@@ -1,22 +1,38 @@
 package net.noobsters.core.paper;
 
+import net.noobsters.core.paper.Listeners.ListenerManager;
 import net.noobsters.core.paper.Listeners.ShieldListeners;
 import net.noobsters.core.paper.shield.Shields;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import co.aikar.commands.PaperCommandManager;
+import lombok.Getter;
 
 
 /**
  * Core
  */
 public class Core extends JavaPlugin{
-    public static YML shields;
+    private @Getter YML shieldPatterns;
+    private @Getter Shields shields;
+    private @Getter PaperCommandManager commandManager;
+    private @Getter ListenerManager listenerManager;
+
     // GUI tutorial: https://github.com/MrMicky-FR/FastInv
     // Scoreboard Tutorial: https://github.com/MrMicky-FR/FastBoard
     // Commands Tutorial: https://github.com/aikar/commands/wiki/Using-ACF
+
+    private static @Getter Core instance;
     @Override
     public void onEnable() {
-        Core.shields = new YML(getDataFolder(), "shields",false);
-        new Shields(this);
+        
+        instance = this;
+
+        commandManager = new PaperCommandManager(this);
+        listenerManager = new ListenerManager(this);
+        shieldPatterns = new YML(instance.getDataFolder(), "shields",false);
+        shields = new Shields();
+
         this.getServer().getPluginManager().registerEvents(new ShieldListeners(), this);
 
     }

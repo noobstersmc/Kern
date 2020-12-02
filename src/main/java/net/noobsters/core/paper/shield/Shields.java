@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Shields {
-    private Core plugin;
+    private Core instance;
     private YML shields;
     private static List<ShieldPattern> patterns = new ArrayList<>();
 
-    public Shields(Core plugin) {
-        this.plugin = plugin;
-        shields = new YML(plugin.getDataFolder(),"shields", false);
+    public Shields(Core instance) {
+        this.instance = instance;
+        shields = new YML(instance.getDataFolder(),"shields", false);
         importPatterns();
     }
 

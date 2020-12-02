@@ -1,7 +1,6 @@
 package net.noobsters.core.paper.Listeners;
 
-
-
+import net.noobsters.core.paper.Core;
 import net.noobsters.core.paper.shield.ShieldPattern;
 import net.noobsters.core.paper.shield.Shields;
 import org.bukkit.Material;
@@ -17,6 +16,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.stream.Collectors;
 
 public class ShieldListeners implements Listener {
+
+    private Core instance;
+
+    public ShieldListeners(Core instance) {
+        this.instance = instance;
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public static void onCraft(PrepareItemCraftEvent event)  {
