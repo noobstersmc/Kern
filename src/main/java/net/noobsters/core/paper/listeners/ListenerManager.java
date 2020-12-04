@@ -1,4 +1,4 @@
-package net.noobsters.core.paper.Listeners;
+package net.noobsters.core.paper.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;

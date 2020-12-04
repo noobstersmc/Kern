@@ -4,8 +4,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
-import net.noobsters.core.paper.Listeners.ListenerManager;
-import net.noobsters.core.paper.Listeners.ShieldListeners;
+import net.noobsters.core.paper.listeners.ListenerManager;
+import net.noobsters.core.paper.listeners.ShieldListeners;
 import net.noobsters.core.paper.shield.Shields;
 
 /**

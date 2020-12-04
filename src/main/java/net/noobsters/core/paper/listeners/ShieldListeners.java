@@ -1,4 +1,4 @@
-package net.noobsters.core.paper.Listeners;
+package net.noobsters.core.paper.listeners;
 
 import net.noobsters.core.paper.Core;
 import net.noobsters.core.paper.shield.ShieldPattern;
