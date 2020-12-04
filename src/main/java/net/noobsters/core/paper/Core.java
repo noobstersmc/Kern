@@ -1,18 +1,17 @@
 package net.noobsters.core.paper;
 
-import net.noobsters.core.paper.Listeners.ListenerManager;
-import net.noobsters.core.paper.Listeners.ShieldListeners;
-import net.noobsters.core.paper.shield.Shields;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
-
+import net.noobsters.core.paper.Listeners.ListenerManager;
+import net.noobsters.core.paper.Listeners.ShieldListeners;
+import net.noobsters.core.paper.shield.Shields;
 
 /**
  * Core
  */
-public class Core extends JavaPlugin{
+public class Core extends JavaPlugin {
     private @Getter YML shieldPatterns;
     private @Getter Shields shields;
     private @Getter PaperCommandManager commandManager;
@@ -23,17 +22,18 @@ public class Core extends JavaPlugin{
     // Commands Tutorial: https://github.com/aikar/commands/wiki/Using-ACF
 
     private static @Getter Core instance;
+
     @Override
     public void onEnable() {
-        
+
         instance = this;
 
         commandManager = new PaperCommandManager(this);
         listenerManager = new ListenerManager(this);
-        shieldPatterns = new YML(instance.getDataFolder(), "shields",false);
-        shields = new Shields();
+        shieldPatterns = new YML(instance.getDataFolder(), "shields", false);
+        shields = new Shields(this);
 
-        this.getServer().getPluginManager().registerEvents(new ShieldListeners(), this);
+        this.getServer().getPluginManager().registerEvents(new ShieldListeners(this), this);
 
     }
 
@@ -41,5 +41,5 @@ public class Core extends JavaPlugin{
     public void onDisable() {
 
     }
-    
+
 }
