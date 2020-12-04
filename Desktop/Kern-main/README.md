@@ -1,0 +1,2 @@
+# Noobsters Core
+The Kern
