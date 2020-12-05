@@ -13,8 +13,9 @@ buildNumber.properties
 
 
 ### Gradle & IntelliJ ###
+.github/
 .gradle/
-/.idea/
+.idea/
 build/
 out/
 run/
@@ -31,16 +32,12 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
 .recommenders
 .externalToolBuilders/
 *.launch
-.factorypath
 .recommenders/
 .apt_generated/
-.project
-.classpath
 
 
 ### Linux ###
@@ -73,7 +70,6 @@ Temporary Items
 
 ### NetBeans ###
 nbproject/private/
-build/
 nbbuild/
 dist/
 nbdist/

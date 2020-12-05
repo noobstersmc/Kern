@@ -25,7 +25,6 @@ public class Core extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
         instance = this;
 
         commandManager = new PaperCommandManager(this);

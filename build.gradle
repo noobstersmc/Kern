@@ -14,8 +14,7 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 group = 'net.noobsters'
-version = '0.1-SNAPSHOT'
-
+version = '0.1'
 
 repositories {
     mavenCentral()
@@ -26,7 +25,6 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.aikar.co/content/groups/aikar/' }
 }
-
 
 dependencies {
     //Paper
@@ -40,7 +38,7 @@ dependencies {
     compile 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     //Scoreboard, maybe use helper by lucko?
     compile 'fr.mrmicky:FastInv:3.0.2'
-    //Coso para que compile
+    //JetBrains @ annotations
     compileOnly 'org.jetbrains:annotations:20.1.0'
 }
 
@@ -57,8 +55,6 @@ shadowJar {
     relocate 'acf-minecraft_', 'shadded.acf.properties.acf-minecraft_'
     relocate 'acf-core_', 'shadded.acf.properties.acf-core_'
     relocate 'fr.mrmicky', 'shadded.gui'
-    
 }
-
 
 build.dependsOn shadowJar
