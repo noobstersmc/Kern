@@ -16,7 +16,6 @@ public class ListenerManager {
         shields = new ShieldListeners(instance);
 
         Bukkit.getPluginManager().registerEvents(new ShieldListeners(instance), instance);
-
     }
 
     public void unregisterListener(Listener listener) {
