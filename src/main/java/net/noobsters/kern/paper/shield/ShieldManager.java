@@ -1,4 +1,4 @@
-package net.noobsters.core.paper.shield;
+package net.noobsters.kern.paper.shield;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;

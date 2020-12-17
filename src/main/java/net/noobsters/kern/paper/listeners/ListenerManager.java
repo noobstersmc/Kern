@@ -1,17 +1,17 @@
-package net.noobsters.core.paper.listeners;
+package net.noobsters.kern.paper.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import lombok.Getter;
-import net.noobsters.core.paper.Core;
+import net.noobsters.kern.paper.Kern;
 
 public class ListenerManager {
-    private Core instance;
+    private Kern instance;
     private @Getter ShieldListeners shields;
 
-    public ListenerManager(Core instance) {
+    public ListenerManager(Kern instance) {
         this.instance = instance;
         shields = new ShieldListeners(instance);
 

@@ -1,8 +1,8 @@
-package net.noobsters.core.paper.listeners;
+package net.noobsters.kern.paper.listeners;
 
-import net.noobsters.core.paper.Core;
-import net.noobsters.core.paper.shield.ShieldPattern;
-import net.noobsters.core.paper.shield.Shields;
+import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.shield.ShieldPattern;
+import net.noobsters.kern.paper.shield.Shields;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.event.EventHandler;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 public class ShieldListeners implements Listener {
 
-    private Core instance;
+    private Kern instance;
 
-    public ShieldListeners(Core instance) {
+    public ShieldListeners(Kern instance) {
         this.instance = instance;
     }
 

@@ -1,7 +1,6 @@
-package net.noobsters.core.paper.shield;
+package net.noobsters.kern.paper.shield;
 
-import net.noobsters.core.paper.Core;
-import net.noobsters.core.paper.YML;
+import net.noobsters.kern.paper.Kern;
 import org.bukkit.DyeColor;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
@@ -10,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Shields {
-    private Core instance;
+    private Kern instance;
     private YML shields;
     private static List<ShieldPattern> patterns = new ArrayList<>();
 
-    public Shields(Core instance) {
+    public Shields(Kern instance) {
         this.instance = instance;
         shields = new YML(instance.getDataFolder(), "shields", false);
         importPatterns();

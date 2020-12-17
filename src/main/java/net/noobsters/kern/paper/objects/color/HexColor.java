@@ -1,4 +1,4 @@
-package net.noobsters.core.paper.objects.color;
+package net.noobsters.kern.paper.objects.color;
 
 import java.util.Map;
 import java.util.MissingFormatArgumentException;

@@ -1,4 +1,4 @@
-package net.noobsters.core.paper.objects.color;
+package net.noobsters.kern.paper.objects.color;
 
 import net.md_5.bungee.api.ChatColor;
 
