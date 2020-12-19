@@ -1,6 +1,7 @@
 package net.noobsters.kern.paper.databases;
 
-import java.util.Optional;
+import static com.mongodb.client.model.Filters.eq;
+
 import java.util.UUID;
 
 import com.google.gson.Gson;
@@ -31,10 +32,9 @@ public class DatabaseManager {
     private @Getter static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private @Getter Kern kern;
     /* All mongo stuff */
-    private @Getter MongoClient mongoClient = MongoClients.create(MongoClientSettings.builder()
-            .applyConnectionString(new ConnectionString(
-                    "mongodb://admin:puto@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false"))
-            .codecRegistry(codecRegistries()).retryWrites(true).build());
+    private @Getter MongoClient mongoClient = MongoClients
+            .create(MongoClientSettings.builder().applyConnectionString(new ConnectionString("mongodb://192.168.0.17"))
+                    .codecRegistry(codecRegistries()).retryWrites(true).build());
     private @Getter MongoDatabase database = mongoClient.getDatabase("Kern");
     private @Getter MongoCollection<Document> collection = database.getCollection("users");
 
@@ -69,6 +69,10 @@ public class DatabaseManager {
         collection.insertOne(user.getAsDocument());
 
         return null;
+    }
+
+    public Document isInCollection(UUID uuid) {
+        return collection.find(eq("_id", uuid)).limit(1).first();
     }
 
 }

@@ -1,12 +1,11 @@
 package net.noobsters.kern.paper.shield;
 
-import net.noobsters.kern.paper.objects.encoder.ShieldEncoder;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class ShieldManager{
     public static ShieldManager getShieldPattern(Player player) {
