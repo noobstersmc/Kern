@@ -8,6 +8,7 @@ plugins{
     id 'eclipse'
     id 'java'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
+    id "io.freefair.lombok" version "5.3.0"
 }
 
 sourceCompatibility = 11
@@ -29,11 +30,6 @@ repositories {
 dependencies {
     //Paper
     compileOnly 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
-    //Lombok
-	compileOnly 'org.projectlombok:lombok:1.18.12'
-	annotationProcessor 'org.projectlombok:lombok:1.18.12'
-	testCompileOnly 'org.projectlombok:lombok:1.18.12'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     //ACF
     compile 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     //Scoreboard, maybe use helper by lucko?

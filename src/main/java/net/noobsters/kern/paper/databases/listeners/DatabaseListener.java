@@ -25,7 +25,8 @@ public class DatabaseListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        final var player = e.getPlayer();
+        final var player = e.getPlayer();        
+        
         var doc = dbManager.isInCollection(player.getUniqueId());
         connectionTime.put(player.getUniqueId().toString(), System.currentTimeMillis());
 
@@ -41,6 +42,7 @@ public class DatabaseListener implements Listener {
             dbManager.getCollection().insertOne(of(Map.of("_id", player.getUniqueId(), "user_data",
                     of(Map.of("name", player.getName(), "first_join", System.currentTimeMillis(), "played_time", 0)))));
         }
+        
 
     }
 
