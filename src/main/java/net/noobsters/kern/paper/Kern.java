@@ -55,7 +55,7 @@ public class Kern extends JavaPlugin {
     @Override
     public void onDisable() {
         //Disconnect from mongodb
-        this.databaseManager.getMongoClient().close();
+        //this.databaseManager.getMongoClient().close();
 
     }
 
