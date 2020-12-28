@@ -1,6 +1,7 @@
 package net.noobsters.kern.paper.portal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -17,9 +19,11 @@ public class Cuboid implements Cloneable, ConfigurationSerializable, Iterable<Bl
 
     protected String worldName;
     protected final Vector minimumPoint, maximumPoint;
+    private Block blockAt;
 
     public Cuboid(Cuboid cuboid) {
-        this(cuboid.worldName, cuboid.minimumPoint.getX(), cuboid.minimumPoint.getY(), cuboid.minimumPoint.getZ(), cuboid.maximumPoint.getX(), cuboid.maximumPoint.getY(), cuboid.maximumPoint.getZ());
+        this(cuboid.worldName, cuboid.minimumPoint.getX(), cuboid.minimumPoint.getY(), cuboid.minimumPoint.getZ(),
+                cuboid.maximumPoint.getX(), cuboid.maximumPoint.getY(), cuboid.maximumPoint.getZ());
     }
 
     public Cuboid(Location loc) {
@@ -65,7 +69,8 @@ public class Cuboid implements Cloneable, ConfigurationSerializable, Iterable<Bl
     }
 
     public boolean containsLocation(Location location) {
-        return location != null && location.getWorld().getName().equals(this.worldName) && location.toVector().isInAABB(this.minimumPoint, this.maximumPoint);
+        return location != null && location.getWorld().getName().equals(this.worldName)
+                && location.toVector().isInAABB(this.minimumPoint, this.maximumPoint);
     }
 
     public boolean containsVector(Vector vector) {
@@ -77,9 +82,31 @@ public class Cuboid implements Cloneable, ConfigurationSerializable, Iterable<Bl
         World world = this.getWorld();
         if (world != null) {
             for (int x = this.minimumPoint.getBlockX(); x <= this.maximumPoint.getBlockX(); x++) {
-                for (int y = this.minimumPoint.getBlockY(); y <= this.maximumPoint.getBlockY() && y <= world.getMaxHeight(); y++) {
+                for (int y = this.minimumPoint.getBlockY(); y <= this.maximumPoint.getBlockY()
+                        && y <= world.getMaxHeight(); y++) {
                     for (int z = this.minimumPoint.getBlockZ(); z <= this.maximumPoint.getBlockZ(); z++) {
                         blockList.add(world.getBlockAt(x, y, z));
+                    }
+                }
+            }
+        }
+        return blockList;
+    }
+
+    public List<Block> getFirstPortal(Material type) {
+        var blockList = new ArrayList<Block>();
+        var world = this.getWorld();
+        if (world != null) {
+            for (int x = this.minimumPoint.getBlockX(); x <= this.maximumPoint.getBlockX(); x++) {
+                for (int y = this.minimumPoint.getBlockY(); y <= this.maximumPoint.getBlockY()
+                        && y <= world.getMaxHeight(); y++) {
+                    for (int z = this.minimumPoint.getBlockZ(); z <= this.maximumPoint.getBlockZ(); z++) {
+                        blockAt = world.getBlockAt(x, y, z);
+                        if (blockAt.getType() == type) {
+                            return Collections.singletonList(blockAt);
+                        } else if (blockAt.getType() == Material.AIR) {
+                            blockList.add(blockAt);
+                        }
                     }
                 }
             }
@@ -120,18 +147,22 @@ public class Cuboid implements Cloneable, ConfigurationSerializable, Iterable<Bl
     }
 
     public double getVolume() {
-        return (this.getUpperX() - this.getLowerX() + 1) * (this.getUpperY() - this.getLowerY() + 1) * (this.getUpperZ() - this.getLowerZ() + 1);
+        return (this.getUpperX() - this.getLowerX() + 1) * (this.getUpperY() - this.getLowerY() + 1)
+                * (this.getUpperZ() - this.getLowerZ() + 1);
     }
 
     public World getWorld() {
         World world = Bukkit.getServer().getWorld(this.worldName);
-        if (world == null) throw new NullPointerException("World '" + this.worldName + "' is not loaded.");
+        if (world == null)
+            throw new NullPointerException("World '" + this.worldName + "' is not loaded.");
         return world;
     }
 
     public void setWorld(World world) {
-        if (world != null) this.worldName = world.getName();
-        else throw new NullPointerException("The world cannot be null.");
+        if (world != null)
+            this.worldName = world.getName();
+        else
+            throw new NullPointerException("The world cannot be null.");
     }
 
     @Override
