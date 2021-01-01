@@ -11,8 +11,11 @@ public class LairTwitter {
     private static Gson gson = new Gson();
     private static String CONDOR_URL = "http://condor.jcedeno.us:420";
 
-    public static String tweet(String tweet) {
+    static{
         Unirest.config().connectTimeout(1000);
+    }
+
+    public static String tweet(String tweet) {
         // Create the tweet as json
         var tweet_json = LairTweet.of(tweet).toJson(gson);
         // Create the request and call for response

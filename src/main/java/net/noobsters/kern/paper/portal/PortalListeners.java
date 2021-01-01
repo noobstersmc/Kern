@@ -10,10 +10,12 @@ import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityPortalExitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -26,6 +28,7 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.twitter.LairTwitter;
 
 @CommandAlias("portals")
 public class PortalListeners extends BaseCommand implements Listener {
@@ -55,6 +58,12 @@ public class PortalListeners extends BaseCommand implements Listener {
             player.sendMessage("Created world " + world);
         }
 
+    }
+
+    @CommandAlias("tweet")
+    public void tweet(CommandSender sender, String tweet){
+        var response = LairTwitter.tweet(tweet);
+        Bukkit.broadcastMessage(response);
     }
 
     @Subcommand("pc")
@@ -149,16 +158,37 @@ public class PortalListeners extends BaseCommand implements Listener {
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 5; y++) {
-                if ((x == 1 || x == 2) && y >= 1 && y <= 3) {
-                    if (fireBlock == null)
-                        fireBlock = b.getRelative(x, y, 0);
-                    continue;
+                for (int z = 0; z < 3; z++) {
+                    if( z==1){
+                        if ((x == 1 || x == 2) && y >= 1 && y <= 3) {
+                            var relative = b.getRelative(x, y, z);
+                            if (fireBlock == null)
+                                fireBlock = relative;
+                                relative.setType(Material.AIR);
+                            continue;
+                        }
+                        b.getRelative(x, y, z).setType(Material.OBSIDIAN);
+                    }else if(y == 0){
+                           
+                        b.getRelative(x, y, z).setType(Material.OBSIDIAN); 
+                    }
+                    else{                        
+                        b.getRelative(x, y, z).setType(Material.AIR);
+
+                    }
+                    
                 }
-                b.getRelative(x, y, 0).setType(Material.OBSIDIAN);
             }
 
         }
         fireBlock.setType(Material.FIRE);
+
+    }
+
+    
+    @EventHandler
+    public void onLeafDecay(LeavesDecayEvent e) {
+        e.setCancelled(true);
 
     }
 
