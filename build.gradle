@@ -38,6 +38,8 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
     //MongoDB
     compile 'org.mongodb:mongodb-driver-sync:4.1.1'
+    //Unirest
+    compile 'com.konghq:unirest-java:3.11.09'
     //compile 'org.mongodb:mongodb-driver-core:4.1.1'
     //compile 'org.mongodb:mongodb-driver-reactivestreams:4.1.1'
 }
