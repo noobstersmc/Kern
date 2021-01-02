@@ -1,6 +1,7 @@
 package net.noobsters.kern.paper.portal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
@@ -60,10 +61,21 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     }
 
-    @CommandAlias("tweet")
-    public void tweet(CommandSender sender, String tweet){
-        var response = LairTwitter.tweet(tweet);
-        Bukkit.broadcastMessage(response);
+    @Subcommand("list")
+    public void portalsList(CommandSender sender) {
+        if (p.isEmpty()) {
+            sender.sendMessage("No players in list");
+        } else {
+
+            p.forEach(all -> {
+                sender.sendMessage(all);
+            });
+        }
+    }
+
+    @Subcommand("clear")
+    public void portalsListClear(CommandSender sender) {
+        p.clear();
     }
 
     @Subcommand("pc")
@@ -86,7 +98,8 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     }
 
-    ArrayList<Player> p = new ArrayList<>();
+    ArrayList<String> p = new ArrayList<>();
+    HashMap<Cuboid, Location> locations = new HashMap<>();
 
     @EventHandler
     public void enterPortal(EntityPortalEnterEvent e) {
@@ -94,98 +107,102 @@ public class PortalListeners extends BaseCommand implements Listener {
             return;
         final var player = (Player) e.getEntity();
 
-        // Bukkit.broadcastMessage("portal");
-        if (p.contains(player)) {
+        if (p.contains(player.getUniqueId().toString())) {
             return;
         }
-        p.add(player);
+        var oneByThreematrix = new int[][][] {};
 
-        // portalMap.put(id, System.currentTimeMillis());
-        Bukkit.broadcastMessage("Coso");
+        p.add(player.getUniqueId().toString());
 
         final var loc = player.getLocation();
         if (loc.getWorld().getEnvironment() == Environment.NORMAL) {
             var nether = Bukkit.getWorld(loc.getWorld().getName() + "_nether");
             if (nether != null) {
-                Bukkit.broadcastMessage("step1");
-                var ratioedLocation = of(nether, Math.floor(loc.getX() / 8), loc.getY(), Math.floor(loc.getZ() / 8));
+                var ratioedLocation = of(nether, Math.floor(loc.getX()), loc.getY(), Math.floor(loc.getZ()));
                 var min = ratioedLocation.clone().add(-64, 0, -64);
-                min.setY(5);
-                Bukkit.broadcastMessage(min.toString());
+                min.setY(124);
                 var max = ratioedLocation.clone().add(64, 0, 64);
-                max.setY(124);
-                Bukkit.broadcastMessage(max.toString());
+                max.setY(5);
                 var cuboid = new Cuboid(min, max);
-
-                Bukkit.broadcastMessage("step2");
                 var list = new ArrayList<Block>();
 
                 var bl = cuboid.getBlocks();
+                Location teleport = null;
 
-                Bukkit.broadcastMessage("step3");
                 for (var c : bl) {
                     var type = c.getType();
                     var l = c.getLocation();
                     if (type == Material.NETHER_PORTAL) {
-                        Bukkit.broadcastMessage(l.toString());
-                        Bukkit.broadcastMessage(c.getBlockData().toString());
-                        Bukkit.broadcastMessage("return " + type);
-                        player.teleportAsync(l);
-                        return;
+                        Bukkit.broadcastMessage("portal_found");
+                        teleport = l;
+                        break;
                     } else if (type == Material.AIR) {
                         list.add(c);
                     }
                 }
 
-                Bukkit.broadcastMessage("step4");
+                if (teleport != null) {
+                    final var ftp = teleport;
 
-                var loc2 = list.get(0).getLocation();
-                createPortal(loc2.getBlock());
-                player.teleport(loc2);
-                Bukkit.broadcastMessage("Random");
+                    player.teleport(ftp);
+                    p.remove(player.getUniqueId().toString());
+                    Bukkit.broadcastMessage("found_teleport\n" + ftp.toString());
 
-                Bukkit.broadcastMessage("step5");
+                } else {
+                    // make ir higher
+                    teleport = list.get(0).getLocation();
+                    list.stream().max(Comparator.comparingInt(Block::getY)).ifPresent(a -> {
+
+                        final var ftp = createPortal(a);
+
+                        player.teleport(ftp);
+                        p.remove(player.getUniqueId().toString());
+                        Bukkit.broadcastMessage("random_teleport\n" + ftp.toString());
+                    });
+
+                    // TODO: Create portal as an object with the structure positions easy to access.
+                }
 
             }
 
+        } else {
+            p.remove(player.getUniqueId().toString());
         }
 
     }
 
-    private void createPortal(Block b) {
+    private Location createPortal(Block b) {
 
         Block fireBlock = null;
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 5; y++) {
                 for (int z = 0; z < 3; z++) {
-                    if( z==1){
+                    if (z == 1) {
                         if ((x == 1 || x == 2) && y >= 1 && y <= 3) {
                             var relative = b.getRelative(x, y, z);
                             if (fireBlock == null)
                                 fireBlock = relative;
-                                relative.setType(Material.AIR);
+                            relative.setType(Material.AIR);
                             continue;
                         }
                         b.getRelative(x, y, z).setType(Material.OBSIDIAN);
-                    }else if(y == 0){
-                           
-                        b.getRelative(x, y, z).setType(Material.OBSIDIAN); 
-                    }
-                    else{                        
+                    } else if (y == 0) {
+
+                        b.getRelative(x, y, z).setType(Material.OBSIDIAN);
+                    } else {
                         b.getRelative(x, y, z).setType(Material.AIR);
 
                     }
-                    
+
                 }
             }
 
         }
         fireBlock.setType(Material.FIRE);
-
+        return fireBlock.getLocation();
     }
 
-    
     @EventHandler
     public void onLeafDecay(LeavesDecayEvent e) {
         e.setCancelled(true);
@@ -202,7 +219,6 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     @EventHandler
     public void cancelPortal(PlayerPortalEvent e) {
-        Bukkit.broadcastMessage("Portal Event");
         e.setCancelled(true);
     }
 
