@@ -28,8 +28,9 @@ import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import net.noobsters.kern.paper.Kern;
-import net.noobsters.kern.paper.twitter.LairTwitter;
 
 @CommandAlias("portals")
 public class PortalListeners extends BaseCommand implements Listener {
@@ -98,6 +99,27 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     }
 
+    /**
+     * NETHER ALGO STARTS
+     */
+
+    @Data
+    @AllArgsConstructor(staticName = "of")
+    public static class Portal {
+        ArrayList<Block> frame;
+        ArrayList<Block> portal_blocks;
+        
+        public static Portal createPortal(){
+
+            return of(null, null);
+
+        }
+    }
+    
+    /**
+     * NETHER ALGO ENDS
+     */
+
     ArrayList<String> p = new ArrayList<>();
     HashMap<Cuboid, Location> locations = new HashMap<>();
 
@@ -120,9 +142,9 @@ public class PortalListeners extends BaseCommand implements Listener {
             if (nether != null) {
                 var ratioedLocation = of(nether, Math.floor(loc.getX()), loc.getY(), Math.floor(loc.getZ()));
                 var min = ratioedLocation.clone().add(-64, 0, -64);
-                min.setY(124);
+                min.setY(100);
                 var max = ratioedLocation.clone().add(64, 0, 64);
-                max.setY(5);
+                max.setY(30);
                 var cuboid = new Cuboid(min, max);
                 var list = new ArrayList<Block>();
 
@@ -134,6 +156,7 @@ public class PortalListeners extends BaseCommand implements Listener {
                     var l = c.getLocation();
                     if (type == Material.NETHER_PORTAL) {
                         Bukkit.broadcastMessage("portal_found");
+                        oneByThreematrix[0][1][2] = 1;
                         teleport = l;
                         break;
                     } else if (type == Material.AIR) {
