@@ -2,6 +2,7 @@ package net.noobsters.kern.paper.portal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,8 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.entity.EntityPortalExitEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 
 import co.aikar.commands.BaseCommand;
@@ -74,6 +73,78 @@ public class PortalListeners extends BaseCommand implements Listener {
         var initial_time = System.currentTimeMillis();
         travelDimensions(player, player.getLocation(), world, ratio);
         Bukkit.broadcastMessage("Took " + (System.currentTimeMillis() - initial_time) + "ms to teleport.");
+    }
+
+    @Subcommand("shape")
+    public void findShape(final Player player) {
+        var target_block = player.getTargetBlock(5);
+        if (target_block != null && target_block.getType() == Material.NETHER_PORTAL) {
+            var relatives = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH,
+                    BlockFace.SOUTH);
+            var block_matrix = new Block[2][3];
+
+            /*
+             * $$$$ $00$ $00$ $00$ $$$$
+             */
+
+            var np = Material.NETHER_PORTAL;
+
+            var up = target_block.getRelative(BlockFace.UP);
+            var down = target_block.getRelative(BlockFace.DOWN);
+            var east = target_block.getRelative(BlockFace.EAST);
+            var west = target_block.getRelative(BlockFace.WEST);
+            var north = target_block.getRelative(BlockFace.NORTH);
+            var south = target_block.getRelative(BlockFace.SOUTH);
+
+            if (isPortalBlock(north) || isPortalBlock(south)) {
+
+                int count = 0;
+                //TODO: CONTINUE HERE, LOCATE THE SHAPE AS A 2D matrix instead of collection of blocks.
+                var relatives_list = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH);
+                var col = new ArrayList<Block>();
+                for (var rel : relatives_list) {
+                    count++;
+                    var rel_block = target_block.getRelative(rel);
+                    if (rel_block.getType() == Material.NETHER_PORTAL) {
+                        col.add(rel_block);
+                        for (var rel_loop : relatives_list) {
+
+                            count++;
+                            var rel_block_loop = rel_block.getRelative(rel_loop);
+                            if (rel_block_loop.getType() == Material.NETHER_PORTAL)
+                                col.add(rel_block_loop);
+                        }
+                    }
+                }
+
+                Bukkit.broadcastMessage("North-South portal type");
+                Bukkit.broadcastMessage("North is " + north.getType() + ", South is " + south.getType());
+                Bukkit.broadcastMessage("Up is " + up.getType() + ", Down is " + down.getType());
+
+                col.forEach(all -> {
+                    Bukkit.broadcastMessage(all.toString());
+                });
+                Bukkit.broadcastMessage(count + " checks");
+                // Find Lower corner
+
+            } else if (isPortalBlock(east) || isPortalBlock(west)) {
+
+                var relatives_list = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.EAST, BlockFace.WEST);
+
+                Bukkit.broadcastMessage("East-west portal type");
+
+                Bukkit.broadcastMessage("East is " + east.getType() + ", West is " + west.getType());
+
+                Bukkit.broadcastMessage("Up is " + up.getType() + ", Down is " + down.getType());
+            } else {
+                Bukkit.broadcastMessage("Not a known portal type?");
+            }
+
+        }
+    }
+
+    private boolean isPortalBlock(Block b) {
+        return b.getType() == Material.NETHER_PORTAL;
     }
 
     /**
@@ -140,13 +211,16 @@ public class PortalListeners extends BaseCommand implements Listener {
     public boolean travelDimensions(Entity entity, Location from, World target, int ratio) {
         final var ratioed_target = new Location(target, from.getX() * ratio, from.getY(), from.getZ() * ratio);
 
+        // new PlayerPortalEvent(entity, from, to, TeleportCause.NETHER_PORTAL, 128,
+        // true, 16);
+
         var min = ratioed_target.clone().add(-64, 0, -64);
         min.setY(30);
         var max = ratioed_target.clone().add(64, 0, 64);
         max.setY(100);
 
-        var cuboid_matrix = new ArrayList<Block>();
-        var optimal = new ArrayList<Block>();
+        double last_distance = Integer.MAX_VALUE;
+        Location closest_loc = null;
 
         for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
             for (int y = min.getBlockY(); y <= max.getBlockY()
@@ -155,41 +229,22 @@ public class PortalListeners extends BaseCommand implements Listener {
                     var block = target.getBlockAt(x, y, z);
                     if (block.getType() == Material.NETHER_PORTAL) {
                         entity.teleport(block.getLocation());
-                        cuboid_matrix.clear();
-                        cuboid_matrix = null;
-
-                        Bukkit.broadcastMessage("Found existing portal");
                         return true;
+                    } else if (block.getType() != Material.AIR
+                            && block.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                        var loc = block.getLocation();
+                        var d = loc.distance(ratioed_target);
+                        if (d < last_distance) {
+                            last_distance = d;
+                            closest_loc = loc;
+                        }
                     }
-                    if (block.getType() != Material.AIR && block.getRelative(BlockFace.UP).getType() == Material.AIR) {
-                        optimal.add(block);
-                    }
-                    cuboid_matrix.add(block);
                 }
             }
         }
-        // Find Closest one
-        double last_distance = Integer.MAX_VALUE;
-        Location closest_loc = null;
-        // Loop and replace
-        for (var optimal_loc : optimal) {
-            var d = optimal_loc.getLocation().distance(ratioed_target);
-            if (d < last_distance) {
-                last_distance = d;
-                closest_loc = optimal_loc.getLocation();
-            }
-        }
-        // Create portal return true
-        if (closest_loc != null) {
-            Bukkit.broadcastMessage("Creating new portal");
-            var portal = Portal.createPortal(closest_loc);
-            entity.teleport(portal.getTeleportLocation());
-            return true;
-        } else {
-            Bukkit.broadcastMessage("Creating new portal at 1:1");
-            var portal = Portal.createPortal(ratioed_target);
-            entity.teleport(portal.getTeleportLocation());
-        }
+
+        var portal = Portal.createPortal(closest_loc != null ? closest_loc : ratioed_target);
+        entity.teleport(portal.getTeleportLocation());
 
         return false;
     }
