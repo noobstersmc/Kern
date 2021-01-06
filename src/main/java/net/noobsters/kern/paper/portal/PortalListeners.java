@@ -1,8 +1,6 @@
 package net.noobsters.kern.paper.portal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,13 +10,11 @@ import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 
@@ -36,7 +32,6 @@ import net.noobsters.kern.paper.Kern;
 public class PortalListeners extends BaseCommand implements Listener {
 
     private Kern instance;
-    private HashMap<String, Long> portalMap = new HashMap<>();
 
     public PortalListeners(final Kern instance) {
         this.instance = instance;
@@ -62,11 +57,6 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     }
 
-    @Subcommand("clear")
-    public void portalsListClear(CommandSender sender) {
-        p.clear();
-    }
-
     @Subcommand("pc")
     @CommandCompletion("@worlds <Integer>")
     public void onPortalCreate(final Player player, World world, int ratio) {
@@ -76,82 +66,14 @@ public class PortalListeners extends BaseCommand implements Listener {
     }
 
     @Subcommand("shape")
-    public void findShape(final Player player) {
-        var target_block = player.getTargetBlock(5);
-        if (target_block != null && target_block.getType() == Material.NETHER_PORTAL) {
-            var relatives = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH,
-                    BlockFace.SOUTH);
-            var block_matrix = new Block[2][3];
-
-            /*
-             * $$$$ $00$ $00$ $00$ $$$$
-             */
-
-            var np = Material.NETHER_PORTAL;
-
-            var up = target_block.getRelative(BlockFace.UP);
-            var down = target_block.getRelative(BlockFace.DOWN);
-            var east = target_block.getRelative(BlockFace.EAST);
-            var west = target_block.getRelative(BlockFace.WEST);
-            var north = target_block.getRelative(BlockFace.NORTH);
-            var south = target_block.getRelative(BlockFace.SOUTH);
-
-            if (isPortalBlock(north) || isPortalBlock(south)) {
-
-                int count = 0;
-                //TODO: CONTINUE HERE, LOCATE THE SHAPE AS A 2D matrix instead of collection of blocks.
-                var relatives_list = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH);
-                var col = new ArrayList<Block>();
-                for (var rel : relatives_list) {
-                    count++;
-                    var rel_block = target_block.getRelative(rel);
-                    if (rel_block.getType() == Material.NETHER_PORTAL) {
-                        col.add(rel_block);
-                        for (var rel_loop : relatives_list) {
-
-                            count++;
-                            var rel_block_loop = rel_block.getRelative(rel_loop);
-                            if (rel_block_loop.getType() == Material.NETHER_PORTAL)
-                                col.add(rel_block_loop);
-                        }
-                    }
-                }
-
-                Bukkit.broadcastMessage("North-South portal type");
-                Bukkit.broadcastMessage("North is " + north.getType() + ", South is " + south.getType());
-                Bukkit.broadcastMessage("Up is " + up.getType() + ", Down is " + down.getType());
-
-                col.forEach(all -> {
-                    Bukkit.broadcastMessage(all.toString());
-                });
-                Bukkit.broadcastMessage(count + " checks");
-                // Find Lower corner
-
-            } else if (isPortalBlock(east) || isPortalBlock(west)) {
-
-                var relatives_list = List.of(BlockFace.DOWN, BlockFace.UP, BlockFace.EAST, BlockFace.WEST);
-
-                Bukkit.broadcastMessage("East-west portal type");
-
-                Bukkit.broadcastMessage("East is " + east.getType() + ", West is " + west.getType());
-
-                Bukkit.broadcastMessage("Up is " + up.getType() + ", Down is " + down.getType());
-            } else {
-                Bukkit.broadcastMessage("Not a known portal type?");
-            }
-
-        }
+    public void findShape(final Player player, @Default("3") Integer row, @Default("2") Integer columm) {
+        var targetBlock = player.getTargetBlock(5);
+        // 3 by 2 is nether portal
+        var portalShape = PortalShape.of(targetBlock.getLocation());
+        var teleportLocation = portalShape.getTeleportLocation(player);
+        player.teleport(teleportLocation);
     }
 
-    private boolean isPortalBlock(Block b) {
-        return b.getType() == Material.NETHER_PORTAL;
-    }
-
-    /**
-     * NETHER ALGO STARTS
-     */
-
-    // Portal Object
     @Data
     @AllArgsConstructor(staticName = "of")
     public static class Portal {
@@ -211,9 +133,6 @@ public class PortalListeners extends BaseCommand implements Listener {
     public boolean travelDimensions(Entity entity, Location from, World target, int ratio) {
         final var ratioed_target = new Location(target, from.getX() * ratio, from.getY(), from.getZ() * ratio);
 
-        // new PlayerPortalEvent(entity, from, to, TeleportCause.NETHER_PORTAL, 128,
-        // true, 16);
-
         var min = ratioed_target.clone().add(-64, 0, -64);
         min.setY(30);
         var max = ratioed_target.clone().add(64, 0, 64);
@@ -228,7 +147,11 @@ public class PortalListeners extends BaseCommand implements Listener {
                 for (int z = max.getBlockZ(); z >= min.getBlockZ(); z--) {
                     var block = target.getBlockAt(x, y, z);
                     if (block.getType() == Material.NETHER_PORTAL) {
-                        entity.teleport(block.getLocation());
+                        var portalShape = PortalShape.of(block.getLocation());
+                        var tpLoc = portalShape.getTeleportLocation(entity);
+                        entity.teleport(tpLoc);
+                        // Clean lava if nearby
+                        replaceNearbyLava(portalShape.getBlocks()[0][0].getRelative(BlockFace.DOWN).getLocation(), 10);
                         return true;
                     } else if (block.getType() != Material.AIR
                             && block.getRelative(BlockFace.UP).getType() == Material.AIR) {
@@ -244,9 +167,29 @@ public class PortalListeners extends BaseCommand implements Listener {
         }
 
         var portal = Portal.createPortal(closest_loc != null ? closest_loc : ratioed_target);
-        entity.teleport(portal.getTeleportLocation());
+        var tpLoc = portal.getTeleportLocation();
+        entity.teleport(tpLoc);
+        // Clean lava if nearby
+
+        var lowest_block = portal.getPortal_blocks()[1][1].getRelative(BlockFace.DOWN);
+        replaceNearbyLava(lowest_block.getLocation(), 10);
 
         return false;
+    }
+
+    private void replaceNearbyLava(Location location, int radius) {
+        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
+            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
+                if (y < location.getBlockY())
+                    continue;
+                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+                    var block = location.getWorld().getBlockAt(x, y, z);
+                    if (block.getType() == Material.LAVA) {
+                        block.setType(Material.AIR);
+                    }
+                }
+            }
+        }
     }
 
     public void travelDimensions(Entity entity, Location from, World target) {
@@ -259,7 +202,6 @@ public class PortalListeners extends BaseCommand implements Listener {
 
     HashMap<Player, Integer> p = new HashMap<>();
     HashMap<Player, Location> portalLocation = new HashMap<>();
-    HashMap<Cuboid, Location> locations = new HashMap<>();
 
     @EventHandler
     public void enterPortal(EntityPortalEnterEvent e) {
@@ -271,8 +213,6 @@ public class PortalListeners extends BaseCommand implements Listener {
         if (cd != null) {
             return;
         }
-
-        Bukkit.broadcastMessage("Attempting.");
         travel(player, 50);
 
     }
@@ -313,22 +253,14 @@ public class PortalListeners extends BaseCommand implements Listener {
                 }
 
             } else {
-                Bukkit.broadcastMessage("Cancelled");
                 p.remove(player);
             }
         }, 1L);
     }
 
-    @EventHandler
-    public void onLeafDecay(LeavesDecayEvent e) {
-        e.setCancelled(true);
-
-    }
-
     /**
      * Cancel vanilla behavior
      */
-
     @EventHandler
     public void cancelPortal(PlayerPortalEvent e) {
         e.setCancelled(true);
