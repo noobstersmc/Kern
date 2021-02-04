@@ -38,7 +38,6 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
 
     compileOnly 'net.milkbowl.vault:VaultAPI:1.7'
-    compile 'net.sf.trove4j:core:3.1.0'
     //compile 'org.mongodb:mongodb-driver-core:4.1.1'
     //compile 'org.mongodb:mongodb-driver-reactivestreams:4.1.1'
 }
@@ -53,7 +52,6 @@ processResources {
 shadowJar {
     relocate 'co.aikar.commands', 'shadded.kern.acf'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
-    relocate 'net.sf.trove4j', 'shadded.kern.trove'
 }
 
 build.dependsOn shadowJar

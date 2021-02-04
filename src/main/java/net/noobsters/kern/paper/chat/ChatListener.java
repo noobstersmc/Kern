@@ -1,5 +1,6 @@
 package net.noobsters.kern.paper.chat;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +15,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServiceRegisterEvent;
 import org.bukkit.event.server.ServiceUnregisterEvent;
 
-import gnu.trove.map.hash.THashMap;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.chat.Chat;
@@ -24,7 +24,7 @@ import net.noobsters.kern.paper.Kern;
 public class ChatListener implements Listener {
     private Kern instance;
     private String format = "&7{prefix}{name}{suffix}:&f {message}";
-    private THashMap<UUID, Long> chatCoolDown = new THashMap<>();
+    private HashMap<UUID, Long> chatCoolDown = new HashMap<>();
 
     public ChatListener(final Kern instance) {
         this.instance = instance;
