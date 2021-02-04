@@ -36,10 +36,7 @@ dependencies {
     compile 'fr.mrmicky:FastInv:3.0.2'
     //JetBrains @ annotations
     compileOnly 'org.jetbrains:annotations:20.1.0'
-    //MongoDB
-    compile 'org.mongodb:mongodb-driver-sync:4.1.1'
-    //Unirest
-    compile 'com.konghq:unirest-java:3.11.09'
+
     compileOnly 'net.milkbowl.vault:VaultAPI:1.7'
     compile 'net.sf.trove4j:core:3.1.0'
     //compile 'org.mongodb:mongodb-driver-core:4.1.1'
@@ -54,8 +51,9 @@ processResources {
 }
 
 shadowJar {
-    relocate 'co.aikar.commands', 'shadded.KERN.acf'
-    relocate 'fr.mrmicky', 'shadded.gui'
+    relocate 'co.aikar.commands', 'shadded.kern.acf'
+    relocate 'fr.mrmicky', 'shadded.kern.gui'
+    relocate 'net.sf.trove4j', 'shadded.kern.trove'
 }
 
 build.dependsOn shadowJar

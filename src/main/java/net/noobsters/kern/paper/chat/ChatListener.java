@@ -29,23 +29,12 @@ public class ChatListener implements Listener {
     public ChatListener(final Kern instance) {
         this.instance = instance;
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, () -> {
-            var iterator = chatCoolDown.entrySet().iterator();
-            while (iterator.hasNext()) {
-                var entry = iterator.next();
-                var differential = entry.getValue() - System.currentTimeMillis();
-                if (differential <= 0) {
-                    iterator.remove();
-                }
-            }
-        }, 2L, 2L);
-
     }
 
     /*
      * Chat Channels
      */
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void chatChannel(AsyncPlayerChatEvent e) {
         var player = e.getPlayer();
         var msg = e.getMessage();
@@ -115,15 +104,17 @@ public class ChatListener implements Listener {
     /*
      * Chat formatters.
      */
-
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void coolDown(AsyncPlayerChatEvent e) {
-        if (chatCoolDown.containsKey(e.getPlayer().getUniqueId()) && !e.getPlayer().hasPermission("chat.spam")) {
+
+        if(!chatCoolDown.containsKey(e.getPlayer().getUniqueId()) || (chatCoolDown.get(e.getPlayer().getUniqueId()) - System.currentTimeMillis()) <= 0){
+            chatCoolDown.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + 2_000);
+        }else if(chatCoolDown.containsKey(e.getPlayer().getUniqueId()) && !e.getPlayer().hasPermission("chat.spam")){
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatColor.RED + "You can chat every 2 seconds.");
-            return;
         }
-        chatCoolDown.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + 2_000);
+
     }
 
     @EventHandler(priority = EventPriority.LOW)
