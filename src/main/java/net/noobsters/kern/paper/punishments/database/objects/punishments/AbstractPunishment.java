@@ -28,7 +28,7 @@ public abstract class AbstractPunishment<T> {
         final var className = this.getClass().getSimpleName();
         final var randomId = UUID.randomUUID().toString().split("-");
         return className + '-' + randomId[0] + '-' + randomId[1];
-    } 
+    }
 
     /**
      * Asks Bukkit the name of the punisher, if it exists.
@@ -42,5 +42,15 @@ public abstract class AbstractPunishment<T> {
             return "Console";
         // Find the name of the player
         return Bukkit.getOfflinePlayer(getPunisher()).getName();
+    }
+
+    /**
+     * Helper method to calculate how many milliseconds are left in the punishment.
+     * Might be negative
+     * 
+     * @return Long, either positive or negative number.
+     */
+    public Long getPunishmentLeft() {
+        return getExpirationTime() - System.currentTimeMillis();
     }
 }
