@@ -4,9 +4,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 import lombok.Getter;
-import net.noobsters.kern.paper.databases.types.DatabaseInterface;
+import net.noobsters.kern.paper.utils.JsonConfig;
 
-public class MongoHynix implements DatabaseInterface {
+public class MongoHynix {
     private @Getter String URI;
     private @Getter MongoClient mongoClient;
 
@@ -15,36 +15,19 @@ public class MongoHynix implements DatabaseInterface {
         this.mongoClient = MongoClients.create(URI);
     }
 
-    @Override
-    public boolean connect() throws Exception {
-        try {
-            System.out.println("Mongo should connect to " + getURI());
-            // Obtain db condor just to ping
-            var db = mongoClient.getDatabase("condor");
-            db.getCollection("punishments");
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * Creates a MongoHynix Client from a simple jsonConfig object with primitive
+     * mongo-uri.
+     * 
+     * @param jsonConfig with mongo-uri as an element.
+     * @return MongoHynix instance or null
+     */
+    public static MongoHynix createFromJson(JsonConfig jsonConfig) {
+        var jsonURI = jsonConfig.getJsonObject().getAsJsonPrimitive("mongodb-connection-uri");
+        if (jsonURI != null && jsonURI.isString()) {
+            return new MongoHynix(jsonURI.getAsString());
         }
-        return false;
-    }
-
-    @Override
-    public boolean disconnect() throws Exception {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isConnected() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public String performQuerry(Object... objects) {
-        // TODO Auto-generated method stub
+        System.err.println("[MongoHynix] No mongodb-connection-uri was found on " + jsonConfig.getFile().getName());
         return null;
     }
-
 }

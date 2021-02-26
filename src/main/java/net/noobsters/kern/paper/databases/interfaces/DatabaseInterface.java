@@ -1,4 +1,4 @@
-package net.noobsters.kern.paper.databases.types;
+package net.noobsters.kern.paper.databases.interfaces;
 
 public interface DatabaseInterface {
     public boolean connect() throws Exception;

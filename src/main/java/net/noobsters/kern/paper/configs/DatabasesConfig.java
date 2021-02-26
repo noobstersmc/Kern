@@ -6,8 +6,22 @@ import net.noobsters.kern.paper.utils.JsonConfig;
 
 public class DatabasesConfig extends JsonConfig {
 
-    public DatabasesConfig() throws Exception {
-        super("databases.json");
+    /**
+     * Helper method to create a dbConfig;
+     * @param filename without 
+     * @return
+     */
+    public static DatabasesConfig of(String filename) {
+        try {
+            return new DatabasesConfig(filename);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public DatabasesConfig(String filename) throws Exception {
+        super(filename + ".json");
         if (!getJsonObject().has("mongodb-connection-uri"))
             addDefaults();
     }

@@ -1,4 +1,4 @@
-package net.noobsters.kern.paper.punishments.database.objects.punishments;
+package net.noobsters.kern.paper.punishments;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
