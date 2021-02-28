@@ -1,4 +1,5 @@
 package net.noobsters.kern.paper;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 import co.aikar.commands.PaperCommandManager;
@@ -8,6 +9,7 @@ import net.noobsters.kern.paper.commands.GlobalMute;
 import net.noobsters.kern.paper.commands.ShieldCMD;
 import net.noobsters.kern.paper.commands.SpecChat;
 import net.noobsters.kern.paper.listeners.ListenerManager;
+import net.noobsters.kern.paper.punishments.PunishmentManager;
 
 public class Kern extends JavaPlugin {
   // GUI tutorial: https://github.com/MrMicky-FR/FastInv
@@ -17,6 +19,7 @@ public class Kern extends JavaPlugin {
   private @Getter PaperCommandManager commandManager;
   private @Getter ListenerManager listenerManager;
   private @Getter ChatManager chatManager;
+  private @Getter PunishmentManager punishmentManager;
 
   private static @Getter Kern instance;
 
@@ -29,19 +32,20 @@ public class Kern extends JavaPlugin {
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
     chatManager = new ChatManager(this);
-        
-    //commands
+
+    // commands
     commandManager.registerCommand(new ShieldCMD(this));
     commandManager.registerCommand(new SpecChat(this));
     commandManager.registerCommand(new GlobalMute(this));
 
-        
-
-    }
-
-    @Override
-    public void onDisable() {
+    this.punishmentManager = new PunishmentManager(this);
 
   }
-    
+
+  @Override
+  public void onDisable() {
+    punishmentManager.getMongoHynix().getMongoClient().close();
+
+  }
+
 }
