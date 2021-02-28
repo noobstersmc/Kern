@@ -3,7 +3,6 @@ package net.noobsters.kern.paper.shield;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.entity.Player;
