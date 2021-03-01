@@ -91,7 +91,7 @@ public class PunishmentCommand extends BaseCommand {
         var durationParsed = BanUnits.parseString(duration);
         /** Now that we have the profile of the player, let's create a ban object */
         var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
-                System.currentTimeMillis(), PunishmentType.BAN);
+                System.currentTimeMillis(), PunishmentType.BAN, false);
         /** Now execute the ban */
         ban.performPunishment(instance.getPunishmentManager().getCollection(), profile);
     }

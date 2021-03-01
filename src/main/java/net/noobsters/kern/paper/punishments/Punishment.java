@@ -26,6 +26,8 @@ public class Punishment {
     Long creation = System.currentTimeMillis();
     @BsonProperty(value = "type")
     PunishmentType type;
+    @BsonProperty(value = "canceled")
+    Boolean canceled = false;
 
     public Punishment() {
     }
