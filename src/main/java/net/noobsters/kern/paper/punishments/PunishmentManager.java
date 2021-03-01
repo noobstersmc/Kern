@@ -3,6 +3,7 @@ package net.noobsters.kern.paper.punishments;
 import static com.mongodb.client.model.Filters.eq;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
@@ -25,6 +26,7 @@ public class PunishmentManager {
     private @Getter DatabasesConfig dbConfig = DatabasesConfig.of("databases");
     private @Getter MongoHynix mongoHynix;
     private @Getter MongoCollection<PlayerProfile> collection;
+    private @Getter HashMap<String, PlayerProfile> cache;
     private @Getter Kern instance;
 
     public PunishmentManager(Kern instance) {

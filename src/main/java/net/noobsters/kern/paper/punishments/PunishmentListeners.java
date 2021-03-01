@@ -9,6 +9,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.noobsters.kern.paper.utils.HTimer;
 
 @RequiredArgsConstructor
 public class PunishmentListeners implements Listener {
@@ -18,7 +19,11 @@ public class PunishmentListeners implements Listener {
     public void onLogin(AsyncPlayerPreLoginEvent event) {
         // On preLogin, query the users
         var uuid = event.getUniqueId();
+        
+        var timer = HTimer.start();
         var profile = pManager.getOrCreatePlayerProfile(uuid.toString());
+        System.out.println("Query took " + timer.stop() + " ms");
+        
         var ban = profile.isBanned();
         if (ban != null) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,

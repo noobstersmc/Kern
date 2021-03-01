@@ -3,6 +3,9 @@ package net.noobsters.kern.paper.punishments;
 import java.text.ParseException;
 import java.util.UUID;
 
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,6 +14,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Flags;
+import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,6 +33,33 @@ public class PunishmentCommand extends BaseCommand {
         var profile = instance.getPunishmentManager().getOrCreatePlayerProfile(target.getUniqueId().toString());
         sender.sendMessage(profile.toString());
 
+    }
+
+    @Subcommand("unban|pardon")
+    public void unBan(CommandSender sender, @Name("name") String nameOrID) {
+        /** Find the player or its id anywhere */
+        var id = getId(nameOrID);
+        if (id == null) {
+            var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrID);
+            if (offlinePlayer != null) {
+                id = offlinePlayer.getUniqueId();
+            } else {
+                var playerProf = PlayerDBUtil.getPlayerObject(nameOrID);
+                if (playerProf == null) {
+                    sender.sendMessage("Couldn't find a minecraft player named " + nameOrID);
+                    return;
+                }
+                id = UUID.fromString(playerProf.get("id").getAsString());
+            }
+        }
+        /** Pop the first punishment */
+        var profile = instance.getPunishmentManager().getCollection().findOneAndUpdate(Filters.eq("_id", id.toString()),
+                Updates.popFirst("bans"));
+        if (profile != null && !profile.getBans().isEmpty()) {
+            sender.sendMessage("Ban " + profile.getBans().get(0) + " has been removed");
+        } else {
+            sender.sendMessage("Player was found but no bans where found on their profile");
+        }
     }
 
     @CommandCompletion("@players")
