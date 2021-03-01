@@ -1,7 +1,6 @@
 package net.noobsters.kern.paper.punishments;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -58,79 +57,12 @@ public class PunishmentCommand extends BaseCommand {
             }
         }
         /** Parse the duration from stirng to ms */
-        var durationParsed = BanUnit.parseString(duration);
+        var durationParsed = BanUnits.parseString(duration);
         /** Now that we have the profile of the player, let's create a ban object */
         var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
                 System.currentTimeMillis(), PunishmentType.BAN);
         /** Now execute the ban */
         ban.performPunishment(instance.getPunishmentManager().getCollection(), profile);
-    }
-
-    /**
-     * Stolen class from
-     * https://github.com/Nerdsie/TempBan/blob/master/TempBan/src/me/NerdsWBNerds/TempBan/BanUnit.java
-     * It transforms the units of time given to the equivalente in seconds.
-     */
-    enum BanUnit {
-        //TODO: SECONDS ARE CURRENTLY BUGGY
-        SECOND("s", 1 / 60), MINUTE("m", 1), HOUR("h", 60), DAY("d", 60 * 24), WEEK("w", 60 * 24 * 7),
-        MONTH("M", 30 * 60 * 24), YEAR("y", 30 * 60 * 24 * 12);
-
-        public String name;
-        public int multi;
-
-        BanUnit(String n, int mult) {
-            name = n;
-            multi = mult;
-        }
-
-        /**
-         * Method by jcedeno
-         * 
-         * @param timeString
-         * @return Milliseconds of the given str
-         */
-        static long parseString(String timeString) {
-            var timeUnits = timeString.split("[^A-Za-z]");
-            var units = new ArrayList<String>();
-            // Split to obtain only the time units
-            for (var str : timeUnits)
-                if (str.length() > 0)
-                    units.add(str);
-
-            // Split to obtain only units of time
-            var unitsOfTime = timeString.split("[A-Za-z]");
-            var un = new ArrayList<Integer>();
-            for (var str : unitsOfTime)
-                if (str.length() > 0)
-                    un.add(Integer.parseInt(str));
-
-            // Now combine them
-            long totaltime = 0;
-            for (int i = 0; i < units.size(); i++)
-                totaltime += (BanUnit.getTicks(units.get(i), un.get(i)));
-
-            return totaltime;
-
-        }
-
-        static long getTicks(String un, int time) {
-            long sec;
-
-            try {
-                sec = time * 60;
-            } catch (NumberFormatException ex) {
-                return 0;
-            }
-
-            for (var unit : BanUnit.values()) {
-                if (un.startsWith(unit.name)) {
-                    return (sec *= unit.multi) * 1000;
-                }
-            }
-
-            return 0;
-        }
     }
 
     UUID getId(String str) {
