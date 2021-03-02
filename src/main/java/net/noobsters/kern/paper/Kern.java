@@ -6,7 +6,7 @@ import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.noobsters.kern.paper.chat.ChatManager;
 import net.noobsters.kern.paper.commands.GlobalMute;
-import net.noobsters.kern.paper.commands.ShieldCMD;
+import net.noobsters.kern.paper.shield.*;
 import net.noobsters.kern.paper.commands.SpecChat;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.punishments.PunishmentManager;
@@ -19,6 +19,7 @@ public class Kern extends JavaPlugin {
   private @Getter PaperCommandManager commandManager;
   private @Getter ListenerManager listenerManager;
   private @Getter ChatManager chatManager;
+  private @Getter ShieldManager shieldManager;
   private @Getter PunishmentManager punishmentManager;
 
   private static @Getter Kern instance;
@@ -29,8 +30,12 @@ public class Kern extends JavaPlugin {
     instance = this;
 
     // managers
+    chatManager = new ChatManager(this);
+    shieldManager = new ShieldManager(this);
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
+        
+    //commands
     chatManager = new ChatManager(this);
 
     // commands
