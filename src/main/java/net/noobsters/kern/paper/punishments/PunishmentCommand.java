@@ -30,7 +30,7 @@ public class PunishmentCommand extends BaseCommand {
     @CommandCompletion("@players")
     @Subcommand("check")
     public void checkPlayer(CommandSender sender, @Flags("other") Player target) {
-        var profile = instance.getPunishmentManager().getOrCreatePlayerProfile(target.getUniqueId().toString());
+        var profile = instance.getPunishmentManager().getOrCreatePlayerProfile(target.getUniqueId());
         sender.sendMessage(profile.toString());
 
     }
@@ -66,27 +66,7 @@ public class PunishmentCommand extends BaseCommand {
     @Subcommand("ban")
     public void banPlayer(CommandSender sender, String nameOrID, String duration, String reason) throws ParseException {
         /* Figure out wheter it is a name or a uuid */
-        PlayerProfile profile;
-        var id = getId(nameOrID);
-        if (id != null) {
-            profile = instance.getPunishmentManager().getOrCreatePlayerProfile(id.toString());
-        } else {
-            /* If it was a name, check if bukkit known the uuid, otherwise call playerdb */
-            var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrID);
-            if (offlinePlayer != null) {
-                profile = instance.getPunishmentManager()
-                        .getOrCreatePlayerProfile(offlinePlayer.getUniqueId().toString());
-            } else {
-                // Query the user's data
-                var playerProf = PlayerDBUtil.getPlayerObject(nameOrID);
-                if (playerProf == null) {
-                    sender.sendMessage("Couldn't find a minecraft player named " + nameOrID);
-                    return;
-                }
-                var actualId = playerProf.get("id").getAsString();
-                profile = instance.getPunishmentManager().getOrCreatePlayerProfile(actualId);
-            }
-        }
+        PlayerProfile profile = instance.getPunishmentManager().getOrCreatePlayerProfile(nameOrID);
         /** Parse the duration from stirng to ms */
         var durationParsed = BanUnits.parseString(duration);
         /** Now that we have the profile of the player, let's create a ban object */

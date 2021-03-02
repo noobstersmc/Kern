@@ -19,11 +19,11 @@ public class PunishmentListeners implements Listener {
     public void onLogin(AsyncPlayerPreLoginEvent event) {
         // On preLogin, query the users
         var uuid = event.getUniqueId();
-        
+
         var timer = HTimer.start();
-        var profile = pManager.getOrCreatePlayerProfile(uuid.toString());
+        var profile = pManager.getOrCreatePlayerProfile(uuid);
         System.out.println("Query took " + timer.stop() + " ms");
-        
+
         var ban = profile.isBanned();
         if (ban != null) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
@@ -34,7 +34,7 @@ public class PunishmentListeners implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onChat(AsyncPlayerChatEvent e) {
         var uuid = e.getPlayer().getUniqueId();
-        var profile = pManager.getOrCreatePlayerProfile(uuid.toString());
+        var profile = pManager.getOrCreatePlayerProfile(uuid);
         var muted = profile.isMuted();
         if (muted != null) {
             e.setCancelled(true);
