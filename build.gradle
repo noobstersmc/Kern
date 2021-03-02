@@ -27,9 +27,10 @@ repositories {
     maven { url 'https://repo.aikar.co/content/groups/aikar/' }
 }
 
+//TODO: Cambiar paper y slf4j a compileOnly
 dependencies {
-    //Paper
-    compileOnly 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
+    //Paper 
+    compile 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
     //ACF
     compile 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     //Scoreboard, maybe use helper by lucko?
@@ -38,8 +39,12 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
 
     compileOnly 'net.milkbowl.vault:VaultAPI:1.7'
-    //compile 'org.mongodb:mongodb-driver-core:4.1.1'
     //compile 'org.mongodb:mongodb-driver-reactivestreams:4.1.1'
+    compile 'org.mongodb:mongodb-driver-sync:4.2.0'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+    // Gson bby
+    implementation 'com.google.code.gson:gson:2.8.6'
+
 }
 
 processResources {
@@ -51,6 +56,8 @@ processResources {
 
 shadowJar {
     relocate 'co.aikar.commands', 'shadded.kern.acf'
+    relocate 'org.mongodb', 'shadded.kern.org.mongodb'
+    relocate 'dev.morphia', 'shadded.kern.org.mongodb.morphia'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
 }
 
