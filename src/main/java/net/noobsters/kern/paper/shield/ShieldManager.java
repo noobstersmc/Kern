@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
@@ -47,21 +48,29 @@ public class ShieldManager implements Listener {
     public ItemStack removeCustomBanner(ItemStack shield) {
 
         var meta = shield.getItemMeta();
-        var bmeta = (BlockStateMeta) meta;
-
+        
         var cleanShield = new ItemStack(Material.SHIELD);
-
         var cMeta = cleanShield.getItemMeta();
 
-        var cbMeta = (BlockStateMeta) cMeta;
-        var cBanner = (Banner) cbMeta.getBlockState();
+        //durability
+        var damageable = (Damageable) meta;
+        var durability = damageable.getDamage();
 
-        bmeta.setBlockState(cBanner);
+        var damageMeta = (Damageable) cMeta;
+        damageMeta.setDamage(durability);
 
-        var banner = (Banner) bmeta.getBlockState();
-        banner.update();
+        //name
+        if(meta.hasDisplayName()) cMeta.setDisplayName(meta.getDisplayName());
 
-        shield.setItemMeta(bmeta);
+        //enchants
+        if(meta.hasEnchants()){
+            var enchants = meta.getEnchants();
+            for (var enchant : enchants.entrySet()) {
+                cMeta.addEnchant(enchant.getKey(), enchant.getValue(), false);
+            }
+        }
+
+        shield.setItemMeta(cMeta);
 
         return shield;
     }

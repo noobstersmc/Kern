@@ -78,12 +78,25 @@ public class ShieldCMD extends BaseCommand {
     public void chooseShield(Player player, String name) {
         var globalShieldList = instance.getShieldManager().getGlobalShieldList();
         var playerCurrentShield = instance.getShieldManager().getPlayerCurrentShield();
+        var shieldManager = instance.getShieldManager();
         var uuid = player.getUniqueId().toString();
 
         if (!globalShieldList.containsKey(name)) {
             player.sendMessage(ChatColor.RED + "Couldn't find custom shield " + name + ".");
         } else {
             playerCurrentShield.put(uuid, globalShieldList.get(name));
+            var inventory = player.getInventory().getContents();
+
+            var customShield = playerCurrentShield.get(uuid);
+            Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD).forEach(shield -> {
+                if (playerCurrentShield.containsKey(uuid)) {
+                    // change shield to custom
+                    shieldManager.setCustomBanner(shield, customShield);
+                } else {
+                    // default shield
+                    shieldManager.removeCustomBanner(shield);
+                }
+            });
             player.sendMessage(ChatColor.GREEN + "Custom shield updated to " + name + ".");
         }
     }
