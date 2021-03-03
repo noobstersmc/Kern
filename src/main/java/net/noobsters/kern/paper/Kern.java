@@ -6,10 +6,12 @@ import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.noobsters.kern.paper.chat.ChatManager;
 import net.noobsters.kern.paper.commands.GlobalMute;
-import net.noobsters.kern.paper.shield.*;
 import net.noobsters.kern.paper.commands.SpecChat;
+import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.punishments.PunishmentManager;
+import net.noobsters.kern.paper.shield.ShieldCMD;
+import net.noobsters.kern.paper.shield.ShieldManager;
 
 public class Kern extends JavaPlugin {
   // GUI tutorial: https://github.com/MrMicky-FR/FastInv
@@ -21,6 +23,7 @@ public class Kern extends JavaPlugin {
   private @Getter ChatManager chatManager;
   private @Getter ShieldManager shieldManager;
   private @Getter PunishmentManager punishmentManager;
+  private @Getter CondorManager condorManager;
 
   private static @Getter Kern instance;
 
@@ -34,8 +37,8 @@ public class Kern extends JavaPlugin {
     shieldManager = new ShieldManager(this);
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
-        
-    //commands
+
+    // commands
     chatManager = new ChatManager(this);
 
     // commands
@@ -43,7 +46,9 @@ public class Kern extends JavaPlugin {
     commandManager.registerCommand(new SpecChat(this));
     commandManager.registerCommand(new GlobalMute(this));
 
+    /** Do this last always */
     this.punishmentManager = new PunishmentManager(this);
+    this.condorManager = new CondorManager(this);
 
   }
 
