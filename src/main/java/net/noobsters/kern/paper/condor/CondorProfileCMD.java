@@ -15,6 +15,7 @@ import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatColor;
 
 @CommandPermission("condor.cmd")
 @CommandAlias("condor")
@@ -29,13 +30,15 @@ public class CondorProfileCMD extends BaseCommand {
     @CommandCompletion("Integer")
     @Subcommand("get all")
     public void getAll(CommandSender sender, @Name("page") @Default("1") Integer page) {
-        var query = condorManager.getCondorCollection().find().limit(5).skip((page > 1 ? page * 5 : 0));
+        var offset = page > 1 ? page * 5 : 0;
+        var query = condorManager.getCondorCollection().find().limit(5).skip((offset));
         var iter = query.iterator();
         var count = 0;
         while (iter.hasNext()) {
             count++;
             var nextElement = iter.next();
-            sender.sendMessage(count + ". " + gson.toJson(nextElement));
+            sender.sendMessage(
+                    ChatColor.GOLD + "" + (count + offset) + ". " + ChatColor.WHITE + gson.toJson(nextElement));
         }
 
     }
