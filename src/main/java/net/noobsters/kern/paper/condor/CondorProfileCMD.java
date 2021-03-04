@@ -29,8 +29,8 @@ public class CondorProfileCMD extends BaseCommand {
 
     @CommandCompletion("Integer")
     @Subcommand("get all")
-    public void getAll(CommandSender sender, @Name("page") @Default("1") Integer page) {
-        var offset = page > 1 ? page * 5 : 0;
+    public void getAll(CommandSender sender, @Name("page") @Default("0") Integer page) {
+        var offset = page;
         var query = condorManager.getCondorCollection().find().limit(5).skip((offset));
         var iter = query.iterator();
         var count = 0;
