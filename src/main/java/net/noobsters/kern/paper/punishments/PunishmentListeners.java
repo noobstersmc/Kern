@@ -38,7 +38,7 @@ public class PunishmentListeners implements Listener {
         var muted = profile.isMuted();
         if (muted != null) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage("You're currently muted for " + muted.getReason());
+            e.getPlayer().sendMessage("You're currently muted for " + muted.getReason() + " " + muted.timeLeft());
         }
     }
 

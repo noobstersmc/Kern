@@ -31,7 +31,7 @@ public class PlayerProfile {
 
     public Punishment isBanned() {
         for (var ban : bans) {
-            if (ban.expiration > System.currentTimeMillis()) {
+            if (ban.expiration > System.currentTimeMillis() && !ban.getCanceled()) {
                 return ban;
             }
         }
@@ -39,9 +39,9 @@ public class PlayerProfile {
     }
 
     public Punishment isMuted() {
-        for (var ban : bans) {
-            if (ban.expiration < System.currentTimeMillis()) {
-                return ban;
+        for (var mute : mutes) {
+            if (mute.expiration > System.currentTimeMillis() && !mute.getCanceled()) {
+                return mute;
             }
         }
         return null;

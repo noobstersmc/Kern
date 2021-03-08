@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -35,36 +34,40 @@ public class PunishmentCommand extends BaseCommand {
 
     }
 
+    @CommandCompletion("@players")
     @Subcommand("unban|pardon")
     public void unBan(CommandSender sender, @Name("name") String nameOrID) {
         /** Find the player or its id anywhere */
-        var id = getId(nameOrID);
-        if (id == null) {
-            var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrID);
-            if (offlinePlayer != null) {
-                id = offlinePlayer.getUniqueId();
-            } else {
-                var playerProf = PlayerDBUtil.getPlayerObject(nameOrID);
-                if (playerProf == null) {
-                    sender.sendMessage("Couldn't find a minecraft player named " + nameOrID);
-                    return;
-                }
-                id = UUID.fromString(playerProf.get("id").getAsString());
-            }
-        }
-        /** Pop the first punishment */
-        var profile = instance.getPunishmentManager().getCollection().findOneAndUpdate(Filters.eq("_id", id.toString()),
-                Updates.popFirst("bans"));
-        if (profile != null && !profile.getBans().isEmpty()) {
-            sender.sendMessage("Ban " + profile.getBans().get(0) + " has been removed");
-        } else {
-            sender.sendMessage("Player was found but no bans where found on their profile");
-        }
+        var profile = instance.getPunishmentManager().queryPlayerIfPresent(nameOrID);
+        /** Query the first ban that is still active */
+        var query = Filters.and(Filters.eq("_id", profile.getUuid()), Filters.elemMatch("bans",
+                Filters.and(Filters.ne("canceled", true), Filters.lt("expiration", System.currentTimeMillis()))));
+        /** Execute an update */
+        var update = instance.getPunishmentManager().getCollection().updateOne(query,
+                Updates.set("bans.$.canceled", true));
+        /** Log it to the sender */
+        sender.sendMessage(update.toString());
     }
 
     @CommandCompletion("@players")
     @Subcommand("ban")
-    public void banPlayer(CommandSender sender, String nameOrID, String duration, String reason) throws ParseException {
+    public void banPlayer(CommandSender sender, @Name("Name") String nameOrID, @Name("Duration") String duration,
+            @Name("Reason") String reason) throws ParseException {
+        /* Figure out wheter it is a name or a uuid */
+        PlayerProfile profile = instance.getPunishmentManager().getOrCreatePlayerProfile(nameOrID);
+        /** Parse the duration from stirng to ms */
+        var durationParsed = BanUnits.parseString(duration);
+        /** Now that we have the profile of the player, let's create a ban object */
+        var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
+                System.currentTimeMillis(), PunishmentType.BAN, false);
+        /** Now execute the ban */
+        ban.performPunishment(instance.getPunishmentManager().getCollection(), profile);
+    }
+
+    @CommandCompletion("@players")
+    @Subcommand("mute")
+    public void mutePlayer(CommandSender sender, @Name("Name") String nameOrID, @Name("Duration") String duration,
+            @Name("Reason") String reason) throws ParseException {
         /* Figure out wheter it is a name or a uuid */
         PlayerProfile profile = instance.getPunishmentManager().getOrCreatePlayerProfile(nameOrID);
         /** Parse the duration from stirng to ms */
