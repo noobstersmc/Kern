@@ -1,7 +1,6 @@
 package net.noobsters.kern.paper.commands;
 
 import java.awt.Color;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
@@ -24,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.disguise.ReflexUtils;
 
 @RequiredArgsConstructor
 @CommandPermission("globalmute.cmd")
@@ -48,39 +48,7 @@ public class GlobalMute extends BaseCommand {
     /**
      * Crazy stuff ignore
      */
-
-    public static final String OBC_PACKAGE = "org.bukkit.craftbukkit";
-    public static final String NMS_PACKAGE = "net.minecraft.server";
-
-    public static final String VERSION = Bukkit.getServer().getClass().getPackage().getName()
-            .substring(OBC_PACKAGE.length() + 1);
-
-    public static String nmsClassName(String className) {
-        return NMS_PACKAGE + '.' + VERSION + '.' + className;
-    }
-
-    public static String obcClassName(String className) {
-        return OBC_PACKAGE + '.' + VERSION + '.' + className;
-    }
-
     HashMap<UUID, String> mapName = new HashMap<>();
-
-    public void setGameprofileName(Player player, String name) {
-        try {
-            var craftPlayerClass = Class.forName(obcClassName("entity.CraftPlayer"));
-            var getHandlerMethod = craftPlayerClass.getDeclaredMethod("getHandle");
-            var getProfileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
-            var entityPlayer = getHandlerMethod.invoke(player);
-            var profile = getProfileMethod.invoke(player);
-
-            var playerProfile = profile;
-            Field ff = playerProfile.getClass().getDeclaredField("name");
-            ff.setAccessible(true);
-            ff.set(playerProfile, name);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     HashMap<UUID, Team> tMap = new HashMap<>();
 
@@ -89,7 +57,15 @@ public class GlobalMute extends BaseCommand {
         var actual_name = sender.getName();
         var customName = obtainRandomChar() + "" + ChatColor.RESET + "" + obtainRandomChar();
         mapName.put(sender.getUniqueId(), customName);
-        setGameprofileName(sender, customName);
+        /** Change the name */
+        ReflexUtils.setGameprofileName(sender, customName);
+        /** Update everyone */
+        Bukkit.getOnlinePlayers().stream().filter(players -> !players.equals(sender))
+                .filter(players -> players.canSee(sender)).forEach(players -> {
+                    players.hidePlayer(instance, sender);
+                    players.showPlayer(instance, sender);
+                });
+        /** Update self */
         var color = ChatColor.of(hexColor);
         var teamID = UUID.randomUUID().toString().split("-")[0];
         var sb = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -102,6 +78,9 @@ public class GlobalMute extends BaseCommand {
             team.addEntry(customName);
         }
 
+    }
+    void sendPackets(Player player){
+        
     }
 
     HashMap<UUID, BukkitTask> tasks = new HashMap<>();
