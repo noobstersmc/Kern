@@ -21,6 +21,11 @@ tasks.withType(JavaCompile) {
 sourceCompatibility = 11
 targetCompatibility = 11
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 group = 'net.noobsters'
 version = '0.2'
 
@@ -45,12 +50,7 @@ repositories {
     }
 }
 
-//TODO: Cambiar paper y slf4j a compileOnly
-dependencies {
-    /** Estos dos */
-    compile 'LibsDisguises:LibsDisguises:10.0.21'
-    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.6.0";
-    //Paper 
+dependencies {//Paper 
     compile 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
     //ACF
     compile 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
@@ -60,11 +60,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
 
     compileOnly 'net.milkbowl.vault:VaultAPI:1.7'
-    //compile 'org.mongodb:mongodb-driver-reactivestreams:4.1.1'
     compile 'org.mongodb:mongodb-driver-sync:4.2.0'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    // Gson bby
-    implementation 'com.google.code.gson:gson:2.8.6'
 
 }
 
