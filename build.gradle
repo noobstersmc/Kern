@@ -22,7 +22,7 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 group = 'net.noobsters'
-version = '0.1'
+version = '0.2'
 
 repositories {
     mavenCentral()
@@ -74,8 +74,8 @@ uploadArchives {
             repository(url: "https://hynix-repository.ue.r.appspot.com/") {
                 authentication(userName: "jcedeno", password: "PinchePerro")
             }
-            pom.version = "0.6A-SNAPSHOT"
-            pom.artifactId = "uhc"
+            pom.version = "0.2A-SNAPSHOT"
+            pom.artifactId = "kern"
             pom.groupId = "net.noobsters"
         }
     }
