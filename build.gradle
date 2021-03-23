@@ -7,8 +7,15 @@
 plugins{
     id 'eclipse'
     id 'java'
+    id 'maven-publish'
+    id 'maven'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
     id "io.freefair.lombok" version "5.3.0"
+}
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 sourceCompatibility = 11
@@ -28,6 +35,14 @@ repositories {
     /**Estos dos */
     maven { url 'https://repo.md-5.net/content/groups/public/'}    
     maven { url "https://repo.dmulloy2.net/repository/public/" }
+    /*Noobsters/Hynix Repository */
+    maven {
+        credentials {
+            username 'jcedeno'
+            password 'PinchePerro'
+        }
+        url "https://hynix-repository.ue.r.appspot.com"
+    }
 }
 
 //TODO: Cambiar paper y slf4j a compileOnly
@@ -51,6 +66,19 @@ dependencies {
     // Gson bby
     implementation 'com.google.code.gson:gson:2.8.6'
 
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer{
+            repository(url: "https://hynix-repository.ue.r.appspot.com/") {
+                authentication(userName: "jcedeno", password: "PinchePerro")
+            }
+            pom.version = "0.6A-SNAPSHOT"
+            pom.artifactId = "uhc"
+            pom.groupId = "net.noobsters"
+        }
+    }
 }
 
 processResources {
