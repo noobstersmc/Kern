@@ -22,7 +22,6 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 java {
-    withJavadocJar()
     withSourcesJar()
 }
 
@@ -89,6 +88,7 @@ shadowJar {
     relocate 'org.mongodb', 'shadded.kern.org.mongodb'
     relocate 'dev.morphia', 'shadded.kern.org.mongodb.morphia'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
+    minimize();
 }
 
 build.dependsOn shadowJar
