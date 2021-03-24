@@ -277,13 +277,11 @@ public class RapidInv implements InventoryHolder {
     }
 
     /**
-     * Clears all items 
+     * Clears all items. Keep it simple, silly
      */
     public void clearAllItems() {
-        int size = inventory.getSize();
-        for (int i = 0; i < size; i++)
-            removeItem(i);
-
+        inventory.clear();
+        itemHandlers.clear();
     }
 
     /**
