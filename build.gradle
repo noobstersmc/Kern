@@ -7,15 +7,26 @@
 plugins{
     id 'eclipse'
     id 'java'
+    id 'maven-publish'
+    id 'maven'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
     id "io.freefair.lombok" version "5.3.0"
+}
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 sourceCompatibility = 11
 targetCompatibility = 11
 
+java {
+    withSourcesJar()
+}
+
 group = 'net.noobsters'
-version = '0.1'
+version = '0.2C'
 
 repositories {
     mavenCentral()
@@ -28,14 +39,17 @@ repositories {
     /**Estos dos */
     maven { url 'https://repo.md-5.net/content/groups/public/'}    
     maven { url "https://repo.dmulloy2.net/repository/public/" }
+    /*Noobsters/Hynix Repository */
+    maven {
+        credentials {
+            username 'jcedeno'
+            password 'PinchePerro'
+        }
+        url "https://hynix-repository.ue.r.appspot.com"
+    }
 }
 
-//TODO: Cambiar paper y slf4j a compileOnly
-dependencies {
-    /** Estos dos */
-    compile 'LibsDisguises:LibsDisguises:10.0.21'
-    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.6.0";
-    //Paper 
+dependencies {//Paper 
     compile 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
     //ACF
     compile 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
@@ -45,12 +59,21 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
 
     compileOnly 'net.milkbowl.vault:VaultAPI:1.7'
-    //compile 'org.mongodb:mongodb-driver-reactivestreams:4.1.1'
     compile 'org.mongodb:mongodb-driver-sync:4.2.0'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    // Gson bby
-    implementation 'com.google.code.gson:gson:2.8.6'
 
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer{
+            repository(url: "https://hynix-repository.ue.r.appspot.com/") {
+                authentication(userName: "jcedeno", password: "PinchePerro")
+            }
+            pom.version = "${version}-SNAPSHOT"
+            pom.artifactId = "kern"
+            pom.groupId = "net.noobsters"
+        }
+    }
 }
 
 processResources {
@@ -65,6 +88,7 @@ shadowJar {
     relocate 'org.mongodb', 'shadded.kern.org.mongodb'
     relocate 'dev.morphia', 'shadded.kern.org.mongodb.morphia'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
+    minimize();
 }
 
 build.dependsOn shadowJar

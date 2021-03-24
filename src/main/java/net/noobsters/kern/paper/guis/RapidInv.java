@@ -1,4 +1,5 @@
 package net.noobsters.kern.paper.guis;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,7 +53,9 @@ public class RapidInv implements InventoryHolder {
     }
 
     /**
-     * Clones the current inventory and returns a new object with the exact same properties as the parent.
+     * Clones the current inventory and returns a new object with the exact same
+     * properties as the parent.
+     * 
      * @param title Title of the cloned inventory
      * @return A new cloned inventory
      */
@@ -271,6 +274,16 @@ public class RapidInv implements InventoryHolder {
         for (int slot : slots) {
             removeItem(slot);
         }
+    }
+
+    /**
+     * Clears all items 
+     */
+    public void clearAllItems() {
+        int size = inventory.getSize();
+        for (int i = 0; i < size; i++)
+            removeItem(i);
+
     }
 
     /**

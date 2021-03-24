@@ -8,6 +8,7 @@ import net.noobsters.kern.paper.chat.ChatManager;
 import net.noobsters.kern.paper.commands.GlobalMute;
 import net.noobsters.kern.paper.commands.SpecChat;
 import net.noobsters.kern.paper.condor.CondorManager;
+import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.punishments.PunishmentManager;
 import net.noobsters.kern.paper.shield.ShieldCMD;
@@ -49,7 +50,8 @@ public class Kern extends JavaPlugin {
     /** Do this last always */
     this.punishmentManager = new PunishmentManager(this);
     this.condorManager = new CondorManager(this);
-
+    /** RapidInv manager */
+    RapidManager.register(this);
   }
 
   @Override
