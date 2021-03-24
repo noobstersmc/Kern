@@ -26,7 +26,7 @@ java {
 }
 
 group = 'net.noobsters'
-version = '0.2B'
+version = '0.2C'
 
 repositories {
     mavenCentral()
@@ -69,7 +69,7 @@ uploadArchives {
             repository(url: "https://hynix-repository.ue.r.appspot.com/") {
                 authentication(userName: "jcedeno", password: "PinchePerro")
             }
-            pom.version = "0.2B-SNAPSHOT"
+            pom.version = "${version}-SNAPSHOT"
             pom.artifactId = "kern"
             pom.groupId = "net.noobsters"
         }
