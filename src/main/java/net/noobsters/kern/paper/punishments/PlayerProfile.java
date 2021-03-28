@@ -24,6 +24,8 @@ public class PlayerProfile {
     List<Punishment> bans;
     @BsonProperty(value = "mutes")
     List<Punishment> mutes;
+    @BsonProperty(value = "addresses")
+    List<String> addresses;
 
     public PlayerProfile() {
 

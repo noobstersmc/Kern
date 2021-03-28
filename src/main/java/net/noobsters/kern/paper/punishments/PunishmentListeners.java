@@ -22,6 +22,7 @@ public class PunishmentListeners implements Listener {
 
         var timer = HTimer.start();
         var profile = pManager.getOrCreatePlayerProfile(uuid);
+        profile.getAddresses().add(event.getAddress().getHostAddress());
         System.out.println("Query took " + timer.stop() + " ms");
 
         var ban = profile.isBanned();

@@ -206,6 +206,17 @@ public class RapidInv implements InventoryHolder {
     }
 
     /**
+     * Updates the {@link ItemStack} on a slot while keeping its previous
+     * {@link InventoryClickEvent} behavior.
+     *
+     * @param slot The slot that needs to be updated.
+     * @param item The new itemstack.
+     */
+    public void updateItem(int slot, ItemStack item) {
+        setItem(slot, item, itemHandlers.get(slot));
+    }
+
+    /**
      * Add an {@link ItemStack} to the inventory on a range of slots.
      *
      * @param slotFrom Starting slot to add the item in.

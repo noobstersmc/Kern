@@ -1,5 +1,6 @@
 package net.noobsters.kern.paper.punishments;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -79,7 +80,7 @@ public class PunishmentManager {
         }
         /** Create the player profile */
         var nProfile = new PlayerProfile(uuid.toString(), name != null ? name : "Unknown", Collections.emptyList(),
-                Collections.emptyList());
+                Collections.emptyList(), new ArrayList<String>());
         /** Insert it into the collection */
         collection.insertOne(nProfile);
         return nProfile;
