@@ -80,7 +80,7 @@ public class PunishmentManager {
         }
         /** Create the player profile */
         var nProfile = new PlayerProfile(uuid.toString(), name != null ? name : "Unknown", Collections.emptyList(),
-                Collections.emptyList(), new ArrayList<String>());
+                Collections.emptyList(), new ArrayList<String>(), "");
         /** Insert it into the collection */
         collection.insertOne(nProfile);
         return nProfile;

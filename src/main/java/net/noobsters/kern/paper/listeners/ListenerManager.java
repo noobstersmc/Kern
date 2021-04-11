@@ -13,8 +13,6 @@ public class ListenerManager {
     public ListenerManager(Kern instance) {
         this.instance = instance;
         Bukkit.getPluginManager().registerEvents(new ChatListener(instance), instance);
-        Bukkit.getPluginManager().registerEvents(instance.getShieldManager(), instance);
-
 
     }
 

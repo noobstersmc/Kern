@@ -35,7 +35,6 @@ public class Kern extends JavaPlugin {
 
     // managers
     chatManager = new ChatManager(this);
-    shieldManager = new ShieldManager(this);
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
 
@@ -50,6 +49,8 @@ public class Kern extends JavaPlugin {
     /** Do this last always */
     this.punishmentManager = new PunishmentManager(this);
     this.condorManager = new CondorManager(this);
+
+    shieldManager = new ShieldManager(this);
     /** RapidInv manager */
     RapidManager.register(this);
   }

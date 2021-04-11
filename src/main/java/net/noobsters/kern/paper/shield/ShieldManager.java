@@ -1,16 +1,30 @@
 package net.noobsters.kern.paper.shield;
 
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.Damageable;
@@ -18,16 +32,39 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.utils.HTimer;
 
 public class ShieldManager implements Listener {
     private @NotNull Kern instance;
     private @Getter HashMap<String, CustomShield> playerCurrentShield = new HashMap<>();
     private @Getter HashMap<String, CustomShield> globalShieldList = new HashMap<>();
 
+    private @Getter MongoDatabase db;
+    private @Getter MongoCollection<CustomShield> shieldCollection;
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
     public ShieldManager(final Kern instance) {
         this.instance = instance;
+        this.db = instance.getPunishmentManager().getMongoHynix().getMongoClient().getDatabase("condor")
+                .withCodecRegistry(fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        fromProviders(PojoCodecProvider.builder().automatic(true).build())));
+        this.shieldCollection = db.getCollection("shields", CustomShield.class);
+        instance.getServer().getPluginManager().registerEvents(this, instance); 
 
     }
+/*
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onJoin(PlayerJoinEvent e) {
+        var player = e.getPlayer();
+        var timer = HTimer.start();
+        var profile = instance.getPunishmentManager().getCollection()
+                .find(Filters.eq("_id", player.getUniqueId().toString())).first();
+
+        Bukkit.broadcastMessage(timer.stop() + "ms\n" + gson.toJson(profile));
+
+    }
+
+    */
 
     public ItemStack setCustomBanner(ItemStack shield, CustomShield customShield) {
 
@@ -48,22 +85,23 @@ public class ShieldManager implements Listener {
     public ItemStack removeCustomBanner(ItemStack shield) {
 
         var meta = shield.getItemMeta();
-        
+
         var cleanShield = new ItemStack(Material.SHIELD);
         var cMeta = cleanShield.getItemMeta();
 
-        //durability
+        // durability
         var damageable = (Damageable) meta;
         var durability = damageable.getDamage();
 
         var damageMeta = (Damageable) cMeta;
         damageMeta.setDamage(durability);
 
-        //name
-        if(meta.hasDisplayName()) cMeta.setDisplayName(meta.getDisplayName());
+        // name
+        if (meta.hasDisplayName())
+            cMeta.setDisplayName(meta.getDisplayName());
 
-        //enchants
-        if(meta.hasEnchants()){
+        // enchants
+        if (meta.hasEnchants()) {
             var enchants = meta.getEnchants();
             for (var enchant : enchants.entrySet()) {
                 cMeta.addEnchant(enchant.getKey(), enchant.getValue(), false);
@@ -125,6 +163,9 @@ public class ShieldManager implements Listener {
             var shield = e.getRecipe().getResult();
 
             e.getInventory().setResult(setCustomBanner(shield, customShield));
+
+            // shield.{name}
+            // shield.*
         }
     }
 
