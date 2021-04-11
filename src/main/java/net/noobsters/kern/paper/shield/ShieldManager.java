@@ -11,20 +11,16 @@ import com.google.gson.GsonBuilder;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.Damageable;
@@ -32,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
-import net.noobsters.kern.paper.utils.HTimer;
 
 public class ShieldManager implements Listener {
     private @NotNull Kern instance;
@@ -45,26 +40,25 @@ public class ShieldManager implements Listener {
 
     public ShieldManager(final Kern instance) {
         this.instance = instance;
-        this.db = instance.getPunishmentManager().getMongoHynix().getMongoClient().getDatabase("condor")
+        this.db = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor")
                 .withCodecRegistry(fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build())));
         this.shieldCollection = db.getCollection("shields", CustomShield.class);
-        instance.getServer().getPluginManager().registerEvents(this, instance); 
+        instance.getServer().getPluginManager().registerEvents(this, instance);
 
     }
-/*
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onJoin(PlayerJoinEvent e) {
-        var player = e.getPlayer();
-        var timer = HTimer.start();
-        var profile = instance.getPunishmentManager().getCollection()
-                .find(Filters.eq("_id", player.getUniqueId().toString())).first();
-
-        Bukkit.broadcastMessage(timer.stop() + "ms\n" + gson.toJson(profile));
-
-    }
-
-    */
+    /*
+     * @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+     * public void onJoin(PlayerJoinEvent e) { var player = e.getPlayer(); var timer
+     * = HTimer.start(); var profile =
+     * instance.getPunishmentManager().getCollection() .find(Filters.eq("_id",
+     * player.getUniqueId().toString())).first();
+     * 
+     * Bukkit.broadcastMessage(timer.stop() + "ms\n" + gson.toJson(profile));
+     * 
+     * }
+     * 
+     */
 
     public ItemStack setCustomBanner(ItemStack shield, CustomShield customShield) {
 

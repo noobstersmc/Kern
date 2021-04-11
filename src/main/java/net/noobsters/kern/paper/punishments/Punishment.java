@@ -1,14 +1,9 @@
 package net.noobsters.kern.paper.punishments;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
-
 import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,25 +36,18 @@ public class Punishment {
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
     }
 
-    public void performPunishment(MongoCollection<PlayerProfile> collection, PlayerProfile profile) {
-        /** Find the player if online */
-        var player = Bukkit.getPlayer(UUID.fromString(profile.getUuid()));
-        if (player != null && player.isOnline()) {
-            /** Perform action based on punishment type */
-            switch (this.type) {
-                case BAN:
-                    player.kickPlayer("You've been banned from the server: " + this.reason);
-                    break;
-                case MUTE:
-                    player.sendMessage("You've been muted for " + this.reason);
-                    break;
+    public void performPunishment(Player player) {
+        switch (this.type) {
+        case BAN:
+            player.kickPlayer("You've been banned from the server: " + this.reason);
+            break;
+        case MUTE:
+            player.sendMessage("You've been muted for " + this.reason);
+            break;
 
-                default:
-                    break;
-            }
+        default:
+            break;
         }
-        /** Write onto the database */
-        collection.findOneAndUpdate(Filters.eq("_id", profile.getUuid()), Updates.push(type.getDBName(), this));
     }
 
 }

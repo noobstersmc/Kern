@@ -2,6 +2,7 @@ package net.noobsters.kern.paper.punishments;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.UUID;
 
 import com.mongodb.MongoClientSettings;
@@ -13,6 +14,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.Bukkit;
 
 import lombok.Getter;
+import lombok.val;
 import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.configs.DatabasesConfig;
 import net.noobsters.kern.paper.databases.impl.MongoHynix;
@@ -25,8 +27,12 @@ public class PunishmentManager {
     private @Getter DatabasesConfig dbConfig = DatabasesConfig.of("databases");
     private @Getter MongoHynix mongoHynix;
     private @Getter MongoCollection<PlayerProfile> collection;
+    // Hashmap that keeps near up to date information about the profile of players.
+    private static @Getter HashMap<String, Timestamp<PlayerProfile>> playerProfileMap = new HashMap<>();
     // private @Getter HashMap<String, PlayerProfile> cache;
     private @Getter Kern instance;
+
+    
 
     public PunishmentManager(Kern instance) {
         this.instance = instance;
@@ -39,6 +45,44 @@ public class PunishmentManager {
                 .getCollection("punishments", PlayerProfile.class);
         Bukkit.getPluginManager().registerEvents(new PunishmentListeners(this), instance);
         instance.getCommandManager().registerCommand(new PunishmentCommand(instance));
+
+    }
+
+    public static PlayerProfile getProfile(UUID uuid) {
+        return getProfile(uuid.toString());
+    }
+
+    public static PlayerProfile getProfile(String uuid) {
+        var profile = playerProfileMap.get(uuid);
+        if (profile != null) {
+            /** If data is too old, submit an update request */
+            if (profile.age() >= 5_000) {
+                Bukkit.getScheduler().runTaskAsynchronously(Kern.getInstance(), () -> {
+
+                });
+            }
+
+            return profile.getObject();
+
+        }
+        return playerProfileMap.get(uuid).getObject();
+
+    }
+
+    /**
+     * Updates the cached
+     * 
+     * @param profile
+     */
+    private void updateCache(final PlayerProfile profile) {
+        /** Update the cache hashmap */
+        if (!playerProfileMap.containsKey(profile.getUuid())) {
+            playerProfileMap.put(profile.getUuid(), new Timestamp<PlayerProfile>(profile));
+        } else {
+            var oldTimestamp = playerProfileMap.get(profile.getUuid());
+            oldTimestamp.setObject(profile);
+        }
+
     }
 
     /**
@@ -52,8 +96,15 @@ public class PunishmentManager {
         var nameAsUUID = getId(name);
         /** Query the uuid is nameAsUUID is null */
         var uuid = nameAsUUID != null ? nameAsUUID : findUUIDOfName(name);
-        if (uuid != null)
-            return getOrCreatePlayerProfile(uuid);
+        if (uuid != null) {
+            val profile = getOrCreatePlayerProfile(uuid);
+            if (profile != null) {
+                updateCache(profile);
+            }
+            return profile;
+        }else{
+
+        }
         /** If nothing found return null */
         return null;
     }
@@ -81,13 +132,14 @@ public class PunishmentManager {
         /** Create the player profile */
         var nProfile = new PlayerProfile(uuid.toString(), name != null ? name : "Unknown", Collections.emptyList(),
                 Collections.emptyList(), new ArrayList<String>(), "");
+
         /** Insert it into the collection */
         collection.insertOne(nProfile);
         return nProfile;
     }
 
     /**
-     * Attempt to localte a player's profile if they've ever joined before.
+     * Attempt to locate a player's profile if they've ever joined before.
      * 
      * @param nameOrID UUID of the Player, or current displayname.
      * @return PlayerProfile if found, otherwise null.

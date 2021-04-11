@@ -18,13 +18,12 @@ public class CondorManager {
 
     public CondorManager(Kern instance) {
         this.instance = instance;
-        this.mongoDatabase = instance.getPunishmentManager().getMongoHynix().getMongoClient().getDatabase("condor");
+        this.mongoDatabase = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor");
         this.condorCollection = mongoDatabase.getCollection("mongoAuth", CondorProfile.class)
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
-                        
-        instance.getCommandManager().getCommandCompletions().registerAsyncCompletion("condor_fields",
-        c -> {
+
+        instance.getCommandManager().getCommandCompletions().registerAsyncCompletion("condor_fields", c -> {
             return ImmutableList.of("name", "token", "credits", "limit", "super");
         });
         instance.getCommandManager().registerCommand(new CondorProfileCMD(this));

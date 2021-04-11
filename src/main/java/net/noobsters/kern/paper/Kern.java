@@ -10,6 +10,7 @@ import net.noobsters.kern.paper.commands.SpecChat;
 import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
+import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.punishments.PunishmentManager;
 import net.noobsters.kern.paper.shield.ShieldCMD;
 import net.noobsters.kern.paper.shield.ShieldManager;
@@ -25,6 +26,7 @@ public class Kern extends JavaPlugin {
   private @Getter ShieldManager shieldManager;
   private @Getter PunishmentManager punishmentManager;
   private @Getter CondorManager condorManager;
+  private @Getter ProfileManager profileManager;
 
   private static @Getter Kern instance;
 
@@ -47,7 +49,7 @@ public class Kern extends JavaPlugin {
     commandManager.registerCommand(new GlobalMute(this));
 
     /** Do this last always */
-    this.punishmentManager = new PunishmentManager(this);
+    this.profileManager = new ProfileManager(this);
     this.condorManager = new CondorManager(this);
 
     shieldManager = new ShieldManager(this);
@@ -57,7 +59,7 @@ public class Kern extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    punishmentManager.getMongoHynix().getMongoClient().close();
+    profileManager.getMongoHynix().getMongoClient().close();
 
   }
 

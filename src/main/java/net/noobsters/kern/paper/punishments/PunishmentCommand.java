@@ -1,11 +1,12 @@
 package net.noobsters.kern.paper.punishments;
 
-import java.text.ParseException;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -18,7 +19,9 @@ import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
 @RequiredArgsConstructor
@@ -26,12 +29,57 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil;
 public class PunishmentCommand extends BaseCommand {
     private @NonNull @Getter Kern instance;
 
+    @CommandCompletion("@players <duration> <reason>")
+    @Subcommand("ban|b")
+    public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
+            @Name("Reason") String reason) {
+        CompletableFuture.supplyAsync(() -> {
+            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
+            UUID uuid = null;
+
+            if (target == null) {
+                var id = getId(nameOrId);
+                if (id != null) {
+                    uuid = id;
+                }
+            } else {
+                uuid = target.getUniqueId();
+            }
+
+            if (uuid != null) {
+                var cachedProfile = ProfileManager.getCache().get(uuid.toString());
+
+                var durationParsed = BanUnits.parseString(duration);
+                /** Now that we have the profile of the player, let's create a ban object */
+                var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
+                        System.currentTimeMillis(), PunishmentType.BAN, false);
+
+                if (cachedProfile != null) {
+                    cachedProfile.commitPunishment(instance.getProfileManager().getCollection(), ban);
+                    Bukkit.getPluginManager().callEvent(new PlayerBannedEvent(uuid));
+
+                    sender.sendMessage(ChatColor.GREEN + "You've banned " + nameOrId + " with the reason " + reason
+                            + " and duration " + duration);
+                    return true;
+                }
+
+            }
+            sender.sendMessage("Couldn't find a player " + nameOrId);
+
+            return true;
+        }).handle((a, ex) -> {
+            sender.sendMessage(ex.getCause().getMessage());
+            ex.printStackTrace();
+            return false;
+        });
+
+    }
+
     @CommandCompletion("@players")
     @Subcommand("check")
     public void checkPlayer(CommandSender sender, @Flags("other") Player target) {
         var profile = instance.getPunishmentManager().getOrCreatePlayerProfile(target.getUniqueId());
         sender.sendMessage(profile.toString());
-
     }
 
     @CommandCompletion("@players")
@@ -47,36 +95,6 @@ public class PunishmentCommand extends BaseCommand {
                 Updates.set("bans.$.canceled", true));
         /** Log it to the sender */
         sender.sendMessage(update.toString());
-    }
-
-    @CommandCompletion("@players")
-    @Subcommand("ban")
-    public void banPlayer(CommandSender sender, @Name("Name") String nameOrID, @Name("Duration") String duration,
-            @Name("Reason") String reason) throws ParseException {
-        /* Figure out wheter it is a name or a uuid */
-        PlayerProfile profile = instance.getPunishmentManager().getOrCreatePlayerProfile(nameOrID);
-        /** Parse the duration from stirng to ms */
-        var durationParsed = BanUnits.parseString(duration);
-        /** Now that we have the profile of the player, let's create a ban object */
-        var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
-                System.currentTimeMillis(), PunishmentType.BAN, false);
-        /** Now execute the ban */
-        ban.performPunishment(instance.getPunishmentManager().getCollection(), profile);
-    }
-
-    @CommandCompletion("@players")
-    @Subcommand("mute")
-    public void mutePlayer(CommandSender sender, @Name("Name") String nameOrID, @Name("Duration") String duration,
-            @Name("Reason") String reason) throws ParseException {
-        /* Figure out wheter it is a name or a uuid */
-        PlayerProfile profile = instance.getPunishmentManager().getOrCreatePlayerProfile(nameOrID);
-        /** Parse the duration from stirng to ms */
-        var durationParsed = BanUnits.parseString(duration);
-        /** Now that we have the profile of the player, let's create a ban object */
-        var ban = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
-                System.currentTimeMillis(), PunishmentType.BAN, false);
-        /** Now execute the ban */
-        ban.performPunishment(instance.getPunishmentManager().getCollection(), profile);
     }
 
     UUID getId(String str) {
