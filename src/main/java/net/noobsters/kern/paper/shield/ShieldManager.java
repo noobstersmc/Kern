@@ -6,8 +6,6 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -36,7 +34,6 @@ public class ShieldManager implements Listener {
 
     private @Getter MongoDatabase db;
     private @Getter MongoCollection<CustomShield> shieldCollection;
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public ShieldManager(final Kern instance) {
         this.instance = instance;
@@ -47,18 +44,6 @@ public class ShieldManager implements Listener {
         instance.getServer().getPluginManager().registerEvents(this, instance);
 
     }
-    /*
-     * @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-     * public void onJoin(PlayerJoinEvent e) { var player = e.getPlayer(); var timer
-     * = HTimer.start(); var profile =
-     * instance.getPunishmentManager().getCollection() .find(Filters.eq("_id",
-     * player.getUniqueId().toString())).first();
-     * 
-     * Bukkit.broadcastMessage(timer.stop() + "ms\n" + gson.toJson(profile));
-     * 
-     * }
-     * 
-     */
 
     public ItemStack setCustomBanner(ItemStack shield, CustomShield customShield) {
 

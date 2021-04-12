@@ -28,7 +28,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.configs.DatabasesConfig;
 import net.noobsters.kern.paper.databases.impl.MongoHynix;
-import net.noobsters.kern.paper.profiles.State.StateType;
 import net.noobsters.kern.paper.punishments.PunishmentCommand;
 import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
@@ -98,7 +97,7 @@ public class ProfileManager implements Listener {
             // Log the ip the player is coming from
             profile.commitNewAddress(address, collection);
             // Log the connection
-            profile.commitChangeOfState(collection, new State(System.currentTimeMillis(), StateType.CONNECT));
+            profile.commitChangeOfState(collection, State.connected());
         }
     }
 
@@ -108,7 +107,7 @@ public class ProfileManager implements Listener {
         var oldProfile = cache.remove(e.getPlayer().getUniqueId().toString());
         if (oldProfile != null) {
             // Log the disconnection
-            oldProfile.commitChangeOfState(collection, new State(System.currentTimeMillis(), StateType.DISCONNECT));
+            oldProfile.commitChangeOfState(collection, State.disconnected());
         }
     }
 
