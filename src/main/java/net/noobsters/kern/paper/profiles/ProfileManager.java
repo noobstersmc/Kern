@@ -23,11 +23,14 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import lombok.Getter;
+import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.configs.DatabasesConfig;
 import net.noobsters.kern.paper.databases.impl.MongoHynix;
 import net.noobsters.kern.paper.profiles.State.StateType;
 import net.noobsters.kern.paper.punishments.PunishmentCommand;
+import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
 
 public class ProfileManager implements Listener {
     private static @Getter Map<String, PlayerProfile> cache = Collections.synchronizedMap(new HashMap<>());
@@ -106,6 +109,30 @@ public class ProfileManager implements Listener {
             // Log the disconnection
             oldProfile.commitChangeOfState(collection, new State(System.currentTimeMillis(), StateType.DISCONNECT));
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerBan(PlayerBannedEvent e) {
+        var player = e.getPlayer();
+        var ban = e.getBan();
+        /** If async, schedule the kick in the main thread */
+        if (Bukkit.isPrimaryThread())
+            player.kickPlayer(ban.getReason());
+        else
+            Bukkit.getScheduler().runTask(Kern.getInstance(), () -> player.kickPlayer(ban.getReason()));
+        /** Broadcast the message to everyone else */
+        Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + " has been banned by " + ban.getPunisher()
+                + " for " + ban.timeLeft());
+
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerMute(PlayerMutedEvent e) {
+        var player = e.getPlayer();
+        var mute = e.getMute();
+        Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + " has been muted by " + mute.getPunisher()
+                + " for " + mute.timeLeft());
+
     }
 
 }

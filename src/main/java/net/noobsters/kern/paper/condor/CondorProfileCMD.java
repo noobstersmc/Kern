@@ -14,7 +14,6 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
@@ -54,18 +53,6 @@ public class CondorProfileCMD extends BaseCommand {
 
         } else {
             sender.sendMessage("Couldn't find a profile for your given token.");
-        }
-
-    }
-
-    @CommandCompletion("@players")
-    @Subcommand("get player")
-    public void getProfileFromPlayer(CommandSender sender, @Name("playerName") @Flags("other") String playerName) {
-        var uuid = condorManager.getInstance().getPunishmentManager().findUUIDOfName(playerName);
-        if (uuid != null) {
-            getProfileFromToken(sender, uuid.toString());
-        } else {
-            sender.sendMessage("Couldn't find a player with that name");
         }
 
     }

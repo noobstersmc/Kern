@@ -11,7 +11,6 @@ import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.profiles.ProfileManager;
-import net.noobsters.kern.paper.punishments.PunishmentManager;
 import net.noobsters.kern.paper.shield.ShieldCMD;
 import net.noobsters.kern.paper.shield.ShieldManager;
 
@@ -24,7 +23,6 @@ public class Kern extends JavaPlugin {
   private @Getter ListenerManager listenerManager;
   private @Getter ChatManager chatManager;
   private @Getter ShieldManager shieldManager;
-  private @Getter PunishmentManager punishmentManager;
   private @Getter CondorManager condorManager;
   private @Getter ProfileManager profileManager;
 

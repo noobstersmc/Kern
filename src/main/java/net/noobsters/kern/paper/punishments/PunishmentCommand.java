@@ -3,17 +3,12 @@ package net.noobsters.kern.paper.punishments;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
@@ -56,7 +51,6 @@ public class PunishmentCommand extends BaseCommand {
 
                 if (cachedProfile != null) {
                     cachedProfile.commitPunishment(instance.getProfileManager().getCollection(), ban);
-                    Bukkit.getPluginManager().callEvent(new PlayerBannedEvent(uuid));
 
                     sender.sendMessage(ChatColor.GREEN + "You've banned " + nameOrId + " with the reason " + reason
                             + " and duration " + duration);
@@ -68,7 +62,52 @@ public class PunishmentCommand extends BaseCommand {
 
             return true;
         }).handle((a, ex) -> {
-            sender.sendMessage(ex.getCause().getMessage());
+            sender.sendMessage(ChatColor.RED + ex.toString());
+            ex.printStackTrace();
+            return false;
+        });
+
+    }
+
+    @CommandCompletion("@players <duration> <reason>")
+    @Subcommand("mute|m")
+    public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
+            @Name("Reason") String reason) {
+        CompletableFuture.supplyAsync(() -> {
+            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
+            UUID uuid = null;
+
+            if (target == null) {
+                var id = getId(nameOrId);
+                if (id != null) {
+                    uuid = id;
+                }
+            } else {
+                uuid = target.getUniqueId();
+            }
+
+            if (uuid != null) {
+                var cachedProfile = ProfileManager.getCache().get(uuid.toString());
+
+                var durationParsed = BanUnits.parseString(duration);
+                /** Now that we have the profile of the player, let's create a ban object */
+                var mute = Punishment.of(sender.getName(), reason, System.currentTimeMillis() + durationParsed,
+                        System.currentTimeMillis(), PunishmentType.MUTE, false);
+
+                if (cachedProfile != null) {
+                    cachedProfile.commitPunishment(instance.getProfileManager().getCollection(), mute);
+
+                    sender.sendMessage(ChatColor.GREEN + "You've muted " + nameOrId + " with the reason " + reason
+                            + " and duration " + duration);
+                    return true;
+                }
+
+            }
+            sender.sendMessage("Couldn't find a player " + nameOrId);
+
+            return true;
+        }).handle((a, ex) -> {
+            sender.sendMessage(ChatColor.RED + ex.toString());
             ex.printStackTrace();
             return false;
         });
@@ -76,25 +115,21 @@ public class PunishmentCommand extends BaseCommand {
     }
 
     @CommandCompletion("@players")
-    @Subcommand("check")
-    public void checkPlayer(CommandSender sender, @Flags("other") Player target) {
-        var profile = instance.getPunishmentManager().getOrCreatePlayerProfile(target.getUniqueId());
-        sender.sendMessage(profile.toString());
-    }
-
-    @CommandCompletion("@players")
     @Subcommand("unban|pardon")
     public void unBan(CommandSender sender, @Name("name") String nameOrID) {
+
         /** Find the player or its id anywhere */
-        var profile = instance.getPunishmentManager().queryPlayerIfPresent(nameOrID);
+        // var profile = instance.getPunishmentManager().queryPlayerIfPresent(nameOrID);
         /** Query the first ban that is still active */
-        var query = Filters.and(Filters.eq("_id", profile.getUuid()), Filters.elemMatch("bans",
-                Filters.and(Filters.ne("canceled", true), Filters.lt("expiration", System.currentTimeMillis()))));
+        // var query = Filters.and(Filters.eq("_id", profile.getUuid()),
+        // Filters.elemMatch("bans",
+        // Filters.and(Filters.ne("canceled", true), Filters.lt("expiration",
+        // System.currentTimeMillis()))));
         /** Execute an update */
-        var update = instance.getPunishmentManager().getCollection().updateOne(query,
-                Updates.set("bans.$.canceled", true));
+        // var update = instance.getPunishmentManager().getCollection().updateOne(query,
+        // Updates.set("bans.$.canceled", true));
         /** Log it to the sender */
-        sender.sendMessage(update.toString());
+        // sender.sendMessage(update.toString());
     }
 
     UUID getId(String str) {
