@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -49,7 +50,7 @@ public class ProfileManager implements Listener {
                     .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                             CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
 
-            this.collection = database.getCollection("ALT", PlayerProfile.class);
+            this.collection = database.getCollection("punishments", PlayerProfile.class);
             // If everything is okay, register the listener.
             Bukkit.getServer().getPluginManager().registerEvents(this, instance);
             instance.getCommandManager().registerCommand(new PunishmentCommand(instance));
@@ -132,6 +133,21 @@ public class ProfileManager implements Listener {
         var mute = e.getMute();
         Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + " has been muted by " + mute.getPunisher()
                 + " for " + mute.timeLeft());
+
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onMutedPlayerChat(AsyncPlayerChatEvent e) {
+        var player = e.getPlayer();
+        var id = player.getUniqueId().toString();
+        var profile = cache.get(id);
+        var mute = profile.isMuted();
+        if (mute != null) {
+            e.setCancelled(true);
+            player.sendMessage(
+                    ChatColor.RED + "You are currently muted for " + mute.getReason() + " (" + mute.timeLeft() + ")");
+
+        }
 
     }
 
