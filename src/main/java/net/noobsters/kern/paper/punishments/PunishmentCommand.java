@@ -50,7 +50,7 @@ public class PunishmentCommand extends BaseCommand {
                         System.currentTimeMillis(), PunishmentType.BAN, false);
 
                 if (cachedProfile != null) {
-                    cachedProfile.commitPunishment(instance.getProfileManager().getCollection(), ban);
+                    cachedProfile.commitPunishment(ban, instance.getProfileManager().getCollection());
 
                     sender.sendMessage(ChatColor.GREEN + "You've banned " + nameOrId + " with the reason " + reason
                             + " and duration " + duration);
@@ -95,7 +95,7 @@ public class PunishmentCommand extends BaseCommand {
                         System.currentTimeMillis(), PunishmentType.MUTE, false);
 
                 if (cachedProfile != null) {
-                    cachedProfile.commitPunishment(instance.getProfileManager().getCollection(), mute);
+                    cachedProfile.commitPunishment(mute, instance.getProfileManager().getCollection());
 
                     sender.sendMessage(ChatColor.GREEN + "You've muted " + nameOrId + " with the reason " + reason
                             + " and duration " + duration);

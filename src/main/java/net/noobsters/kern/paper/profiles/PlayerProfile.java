@@ -18,10 +18,7 @@ import org.bukkit.ChatColor;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.punishments.Punishment;
-import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
-import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
 
 @Data
 @AllArgsConstructor
@@ -247,28 +244,6 @@ public class PlayerProfile {
             Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
             return false;
         });
-    }
-
-    public void commitPunishment(MongoCollection<PlayerProfile> collection, Punishment punishment) {
-        // Add it to the local copy
-        switch (punishment.getType()) {
-        case BAN: {
-            Bukkit.getPluginManager().callEvent(new PlayerBannedEvent(this, punishment, true));
-            bans.add(punishment);
-            break;
-        }
-        case MUTE: {
-            Bukkit.getPluginManager().callEvent(new PlayerMutedEvent(this, punishment, true));
-            mutes.add(punishment);
-            break;
-        }
-        default: {
-            break;
-        }
-        }
-        // Commit it to the database
-        Bukkit.getScheduler().runTaskAsynchronously(Kern.getInstance(), () -> collection
-                .findOneAndUpdate(eq("_id", uuid), Updates.push(punishment.getType().getDBName(), punishment)));
     }
 
     /**
