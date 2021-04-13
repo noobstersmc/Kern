@@ -7,6 +7,10 @@ import org.bukkit.entity.Player;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import net.noobsters.kern.paper.profiles.PlayerProfile;
+import net.noobsters.kern.paper.punishments.events.GenericPunishmentEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
 
 @Data
 @AllArgsConstructor(staticName = "of")
@@ -47,6 +51,19 @@ public class Punishment {
 
         default:
             break;
+        }
+    }
+
+    @SuppressWarnings("all")
+    public <E extends GenericPunishmentEvent> E getEvent(PlayerProfile profile, boolean async) {
+        switch (this.type) {
+        case BAN:
+            return (E) new PlayerBannedEvent(profile, this, async);
+        case MUTE:
+
+            return (E) new PlayerMutedEvent(profile, this, async);
+        default:
+            return (E) new GenericPunishmentEvent(profile, this, async);
         }
     }
 

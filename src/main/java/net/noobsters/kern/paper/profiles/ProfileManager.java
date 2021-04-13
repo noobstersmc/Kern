@@ -74,7 +74,7 @@ public class ProfileManager implements Listener {
         var query = collection.find(Filters.eq("_id", id.toString())).first();
 
         if (query != null) {
-            query.addAdress(address);
+            query.commitAddress(address, collection);
             cache.put(id.toString(), query);
         } else {
             var newProfile = PlayerProfile.create(id, e.getName(), address);
@@ -87,17 +87,14 @@ public class ProfileManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onLogin(PlayerLoginEvent e) {
         var player = e.getPlayer();
-        var address = e.getAddress().getHostAddress();
         var profile = cache.get(player.getUniqueId().toString());
         if (profile != null) {
             var ban = profile.isBanned();
             if (ban != null) {
                 e.disallow(PlayerLoginEvent.Result.KICK_BANNED, ban.timeLeft());
             }
-            // Log the ip the player is coming from
-            profile.commitNewAddress(address, collection);
             // Log the connection
-            profile.commitChangeOfState(collection, State.connected());
+            profile.commitChangeOfState(State.connected(), collection);
         }
     }
 
@@ -107,7 +104,7 @@ public class ProfileManager implements Listener {
         var oldProfile = cache.remove(e.getPlayer().getUniqueId().toString());
         if (oldProfile != null) {
             // Log the disconnection
-            oldProfile.commitChangeOfState(collection, State.disconnected());
+            oldProfile.commitChangeOfState(State.disconnected(), collection);
         }
     }
 
