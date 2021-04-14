@@ -16,6 +16,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
@@ -28,7 +29,7 @@ public class PunishmentCommand extends BaseCommand {
     @Subcommand("ban|b")
     public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
             @Name("Reason") String reason) {
-        CompletableFuture.supplyAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
             UUID uuid = null;
 
@@ -54,13 +55,11 @@ public class PunishmentCommand extends BaseCommand {
 
                     sender.sendMessage(ChatColor.GREEN + "You've banned " + nameOrId + " with the reason " + reason
                             + " and duration " + duration);
-                    return true;
+                    return;
                 }
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-
-            return true;
         }).handle((a, ex) -> {
             sender.sendMessage(ChatColor.RED + ex.toString());
             ex.printStackTrace();
@@ -73,7 +72,7 @@ public class PunishmentCommand extends BaseCommand {
     @Subcommand("mute|m")
     public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
             @Name("Reason") String reason) {
-        CompletableFuture.supplyAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
             UUID uuid = null;
 
@@ -99,13 +98,11 @@ public class PunishmentCommand extends BaseCommand {
 
                     sender.sendMessage(ChatColor.GREEN + "You've muted " + nameOrId + " with the reason " + reason
                             + " and duration " + duration);
-                    return true;
+                    return;
                 }
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-
-            return true;
         }).handle((a, ex) -> {
             sender.sendMessage(ChatColor.RED + ex.toString());
             ex.printStackTrace();
@@ -115,21 +112,133 @@ public class PunishmentCommand extends BaseCommand {
     }
 
     @CommandCompletion("@players")
-    @Subcommand("unban|pardon")
-    public void unBan(CommandSender sender, @Name("name") String nameOrID) {
+    @Subcommand("unmute|um")
+    public void unMute(CommandSender sender, @Name("name") String nameOrId) {
+        CompletableFuture.runAsync(() -> {
+            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
+            UUID uuid = null;
+            PlayerProfile profile = null;
 
-        /** Find the player or its id anywhere */
-        // var profile = instance.getPunishmentManager().queryPlayerIfPresent(nameOrID);
-        /** Query the first ban that is still active */
-        // var query = Filters.and(Filters.eq("_id", profile.getUuid()),
-        // Filters.elemMatch("bans",
-        // Filters.and(Filters.ne("canceled", true), Filters.lt("expiration",
-        // System.currentTimeMillis()))));
-        /** Execute an update */
-        // var update = instance.getPunishmentManager().getCollection().updateOne(query,
-        // Updates.set("bans.$.canceled", true));
-        /** Log it to the sender */
-        // sender.sendMessage(update.toString());
+            if (target == null) {
+                var id = getId(nameOrId);
+                if (id != null) {
+                    uuid = id;
+                } else {
+                    var playerLookupObject = PlayerDBUtil.getPlayerObject(nameOrId);
+                    if (playerLookupObject != null) {
+                        uuid = UUID.fromString(playerLookupObject.get("id").getAsString());
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "No player named " + nameOrId
+                                + " could be found in the mojang record.");
+                        return;
+                    }
+                }
+            } else {
+                uuid = target.getUniqueId();
+            }
+
+            if (uuid != null) {
+                var cachedProfile = ProfileManager.getCache().get(uuid.toString());
+
+                if (cachedProfile != null) {
+                    profile = cachedProfile;
+                } else {
+                    // If not cached, check the database.
+                }
+
+                var mute = profile.isMuted();
+                if (mute == null) {
+                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
+                    return;
+                }
+                // TODO: Pardon the banned player
+                final var prof = profile;
+                profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept(c -> {
+                    if (c) {
+                        sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName() + "'s ban "
+                                + mute.toString());
+
+                    } else {
+                        sender.sendMessage(
+                                ChatColor.RED + "Couldn't unmute " + prof.getName() + "'s ban " + mute.toString());
+
+                    }
+
+                });
+
+            }
+
+        }).handle((a, ex) -> {
+            sender.sendMessage(ChatColor.RED + ex.toString());
+            ex.printStackTrace();
+            return false;
+        });
+        ;
+    }
+
+    @CommandCompletion("@players")
+    @Subcommand("unban|pardon")
+    public void unBan(CommandSender sender, @Name("name") String nameOrId) {
+        CompletableFuture.runAsync(() -> {
+            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
+            UUID uuid = null;
+            PlayerProfile profile = null;
+
+            if (target == null) {
+                var id = getId(nameOrId);
+                if (id != null) {
+                    uuid = id;
+                } else {
+                    var playerLookupObject = PlayerDBUtil.getPlayerObject(nameOrId);
+                    if (playerLookupObject != null) {
+                        uuid = UUID.fromString(playerLookupObject.get("id").getAsString());
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "No player named " + nameOrId
+                                + " could be found in the mojang record.");
+                        return;
+                    }
+                }
+            } else {
+                uuid = target.getUniqueId();
+            }
+
+            if (uuid != null) {
+                var cachedProfile = ProfileManager.getCache().get(uuid.toString());
+
+                if (cachedProfile != null) {
+                    profile = cachedProfile;
+                } else {
+                    // If not cached, check the database.
+                }
+
+                var ban = profile.isBanned();
+                if (ban == null) {
+                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently banned.");
+                    return;
+                }
+                // TODO: Pardon the banned player
+                final var prof = profile;
+                profile.pardonPunishment(ban, instance.getProfileManager().getCollection()).thenAccept(c -> {
+                    if (c) {
+                        sender.sendMessage(ChatColor.GREEN + "You've succesful pardoned " + prof.getName() + "'s ban "
+                                + ban.toString());
+
+                    } else {
+                        sender.sendMessage(
+                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s ban " + ban.toString());
+
+                    }
+
+                });
+
+            }
+
+        }).handle((a, ex) -> {
+            sender.sendMessage(ChatColor.RED + ex.toString());
+            ex.printStackTrace();
+            return false;
+        });
+        ;
     }
 
     UUID getId(String str) {

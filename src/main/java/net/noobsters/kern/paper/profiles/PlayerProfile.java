@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
 import org.bson.codecs.pojo.annotations.BsonId;
@@ -19,6 +20,7 @@ import org.bukkit.ChatColor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import net.noobsters.kern.paper.punishments.Punishment;
+import net.noobsters.kern.paper.punishments.PunishmentType;
 
 @Data
 @AllArgsConstructor
@@ -89,11 +91,10 @@ public class PlayerProfile {
      * @return Punishment or null is no active punishment was found.
      */
     public Punishment isBanned() {
-        for (var ban : bans) {
-            if (ban.getExpiration() > System.currentTimeMillis() && !ban.getCanceled()) {
+        for (var ban : bans)
+            if (ban.isActive())
                 return ban;
-            }
-        }
+
         return null;
     }
 
@@ -103,11 +104,10 @@ public class PlayerProfile {
      * @return Punishment or null is no active punishment was found.
      */
     public Punishment isMuted() {
-        for (var mute : mutes) {
-            if (mute.getExpiration() > System.currentTimeMillis() && !mute.getCanceled()) {
+        for (var mute : mutes)
+            if (mute.isActive())
                 return mute;
-            }
-        }
+
         return null;
     }
 
@@ -236,9 +236,45 @@ public class PlayerProfile {
     public CompletableFuture<Boolean> commitPunishment(Punishment punishment,
             MongoCollection<PlayerProfile> collection) {
         return CompletableFuture.supplyAsync(() -> {
+            /** Update the database */
+            var type = punishment.getType();
+            findOneAndUpdate(collection, Updates.push(type.getDBName(), punishment));
+            /** Update the local copy if everything went correctly */
+            if (type == PunishmentType.BAN) {
+                bans.add(punishment);
+            } else if (type == PunishmentType.MUTE) {
+                mutes.add(punishment);
+            }
+            /** Call the event with the updated data */
             Bukkit.getPluginManager().callEvent(punishment.getEvent(this, true));
-            findOneAndUpdate(collection, Updates.push(punishment.getType().getDBName(), punishment));
             return true;
+        }).handle((ignore, ex) -> {
+            ex.printStackTrace();
+            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
+            return false;
+        });
+    }
+
+    public CompletableFuture<Boolean> pardonPunishment(final Punishment punishment,
+            MongoCollection<PlayerProfile> collection) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            var punishmentDbName = punishment.getType().getDBName();
+            var filter = Filters.and(eq("_id", this.getUuid()),
+                    Filters.elemMatch(punishmentDbName, punishment.obtainMatchingFilter()));
+            var updateResult = collection.updateOne(filter, Updates.set(punishmentDbName + ".$.canceled", true));
+            if (updateResult.getModifiedCount() > 0) {
+                punishment.setCanceled(true);
+                if (punishmentDbName.equalsIgnoreCase("bans")) {
+                    System.out.println(bans.toString());
+                } else if (punishmentDbName.equalsIgnoreCase("mutes")) {
+                    System.out.println(mutes.toString());
+                }
+                Bukkit.getPluginManager().callEvent(punishment.getPardonEvent(this, true));
+                return true;
+            }
+
+            return false;
         }).handle((ignore, ex) -> {
             ex.printStackTrace();
             Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");

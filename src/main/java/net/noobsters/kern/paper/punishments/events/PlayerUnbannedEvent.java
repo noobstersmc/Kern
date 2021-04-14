@@ -3,9 +3,9 @@ package net.noobsters.kern.paper.punishments.events;
 import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.punishments.Punishment;
 
-public class PlayerMutedEvent extends GenericPunishmentEvent {
+public class PlayerUnbannedEvent  extends GenericPunishmentEvent{
 
-    public PlayerMutedEvent(PlayerProfile profile, Punishment ban, boolean async) {
+    public PlayerUnbannedEvent(PlayerProfile profile, Punishment ban, boolean async) {
         super(profile, ban, async);
     }
 
@@ -14,8 +14,9 @@ public class PlayerMutedEvent extends GenericPunishmentEvent {
      * 
      * @return the punishment called by this event.
      */
-    public Punishment getMute() {
+    public Punishment getBan(){
         return this.getPunishment();
     }
-
+    
+    
 }

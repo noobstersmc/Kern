@@ -1,9 +1,12 @@
 package net.noobsters.kern.paper.punishments;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+
 import java.util.concurrent.TimeUnit;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bukkit.entity.Player;
+import org.bson.conversions.Bson;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +14,8 @@ import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.punishments.events.GenericPunishmentEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerUnbannedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerUnmutedEvent;
 
 @Data
 @AllArgsConstructor(staticName = "of")
@@ -40,18 +45,13 @@ public class Punishment {
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
     }
 
-    public void performPunishment(Player player) {
-        switch (this.type) {
-        case BAN:
-            player.kickPlayer("You've been banned from the server: " + this.reason);
-            break;
-        case MUTE:
-            player.sendMessage("You've been muted for " + this.reason);
-            break;
+    public boolean isActive() {
+        return this.getExpiration() > System.currentTimeMillis() && !this.getCanceled();
+    }
 
-        default:
-            break;
-        }
+    public Bson obtainMatchingFilter() {
+        return and(eq("punisher", punisher), eq("reason", reason), eq("expiration", expiration), eq("type", type),
+                eq("canceled", canceled));
     }
 
     @SuppressWarnings("all")
@@ -60,8 +60,19 @@ public class Punishment {
         case BAN:
             return (E) new PlayerBannedEvent(profile, this, async);
         case MUTE:
-
             return (E) new PlayerMutedEvent(profile, this, async);
+        default:
+            return (E) new GenericPunishmentEvent(profile, this, async);
+        }
+    }
+
+    @SuppressWarnings("all")
+    public <E extends GenericPunishmentEvent> E getPardonEvent(PlayerProfile profile, boolean async) {
+        switch (this.type) {
+        case BAN:
+            return (E) new PlayerUnbannedEvent(profile, this, async);
+        case MUTE:
+            return (E) new PlayerUnmutedEvent(profile, this, async);
         default:
             return (E) new GenericPunishmentEvent(profile, this, async);
         }

@@ -9,6 +9,11 @@ public class PlayerBannedEvent extends GenericPunishmentEvent{
         super(profile, ban, async);
     }
 
+    /**
+     * Utility function, shortcut to {@link GenericPunishmentEvent#getPunishment()}
+     * 
+     * @return the punishment called by this event.
+     */
     public Punishment getBan(){
         return this.getPunishment();
     }
