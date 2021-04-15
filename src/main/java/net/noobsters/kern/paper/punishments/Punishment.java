@@ -45,12 +45,12 @@ public class Punishment {
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
     }
 
-    public boolean isActive() {
+    public boolean obtainActive() {
         return this.getExpiration() > System.currentTimeMillis() && !this.getCanceled();
     }
 
     public Bson obtainMatchingFilter() {
-        return and(eq("punisher", punisher), eq("reason", reason), eq("expiration", expiration), eq("type", type),
+        return and(eq("punisher", punisher), eq("reason", reason), eq("expiration", expiration),
                 eq("canceled", canceled));
     }
 

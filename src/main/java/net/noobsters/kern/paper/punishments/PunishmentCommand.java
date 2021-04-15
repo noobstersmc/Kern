@@ -18,6 +18,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.profiles.ProfileManager;
+import net.noobsters.kern.paper.punishments.exceptions.ExceptionHandlers;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
 @RequiredArgsConstructor
@@ -60,11 +61,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-        }).handle((a, ex) -> {
-            sender.sendMessage(ChatColor.RED + ex.toString());
-            ex.printStackTrace();
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleVoid);
 
     }
 
@@ -80,6 +77,15 @@ public class PunishmentCommand extends BaseCommand {
                 var id = getId(nameOrId);
                 if (id != null) {
                     uuid = id;
+                } else {
+                    var playerLookupObject = PlayerDBUtil.getPlayerObject(nameOrId);
+                    if (playerLookupObject != null) {
+                        uuid = UUID.fromString(playerLookupObject.get("id").getAsString());
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "No player named " + nameOrId
+                                + " could be found in the mojang record.");
+                        return;
+                    }
                 }
             } else {
                 uuid = target.getUniqueId();
@@ -87,6 +93,22 @@ public class PunishmentCommand extends BaseCommand {
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
+                if (cachedProfile == null) {
+                    System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
+                            + "is not cached. Performing a lookup.");
+                    try {
+                        var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
+                        if (optionalProfile.isPresent()) {
+                            cachedProfile = optionalProfile.get();
+                        } else {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        sender.sendMessage(ChatColor.RED + e.toString());
+                        e.printStackTrace();
+                        return;
+                    }
+                }
 
                 var durationParsed = BanUnits.parseString(duration);
                 /** Now that we have the profile of the player, let's create a ban object */
@@ -103,11 +125,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-        }).handle((a, ex) -> {
-            sender.sendMessage(ChatColor.RED + ex.toString());
-            ex.printStackTrace();
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleVoid);
 
     }
 
@@ -144,6 +162,20 @@ public class PunishmentCommand extends BaseCommand {
                     profile = cachedProfile;
                 } else {
                     // If not cached, check the database.
+                    System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
+                            + "is not cached. Performing a lookup.");
+                    try {
+                        var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
+                        if (optionalProfile.isPresent()) {
+                            profile = optionalProfile.get();
+                        } else {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        sender.sendMessage(ChatColor.RED + e.toString());
+                        e.printStackTrace();
+                        return;
+                    }
                 }
 
                 var mute = profile.isMuted();
@@ -151,29 +183,23 @@ public class PunishmentCommand extends BaseCommand {
                     sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
                     return;
                 }
-                // TODO: Pardon the banned player
+                // TODO: Pardon the muted player
                 final var prof = profile;
-                profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept(c -> {
+                profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
-                        sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName() + "'s ban "
-                                + mute.toString());
+                        sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName());
 
                     } else {
                         sender.sendMessage(
-                                ChatColor.RED + "Couldn't unmute " + prof.getName() + "'s ban " + mute.toString());
+                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s mute " + mute.toString());
 
                     }
-
                 });
 
             }
 
-        }).handle((a, ex) -> {
-            sender.sendMessage(ChatColor.RED + ex.toString());
-            ex.printStackTrace();
-            return false;
-        });
-        ;
+        }).handle(ExceptionHandlers::handleVoid);
+
     }
 
     @CommandCompletion("@players")
@@ -209,36 +235,43 @@ public class PunishmentCommand extends BaseCommand {
                     profile = cachedProfile;
                 } else {
                     // If not cached, check the database.
+                    System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
+                            + "is not cached. Performing a lookup.");
+                    try {
+                        var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
+                        if (optionalProfile.isPresent()) {
+                            profile = optionalProfile.get();
+                        } else {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        sender.sendMessage(ChatColor.RED + e.toString());
+                        e.printStackTrace();
+                        return;
+                    }
                 }
 
-                var ban = profile.isBanned();
-                if (ban == null) {
-                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently banned.");
+                var mute = profile.isMuted();
+                if (mute == null) {
+                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
                     return;
                 }
-                // TODO: Pardon the banned player
+                // TODO: Pardon the muted player
                 final var prof = profile;
-                profile.pardonPunishment(ban, instance.getProfileManager().getCollection()).thenAccept(c -> {
+                profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
-                        sender.sendMessage(ChatColor.GREEN + "You've succesful pardoned " + prof.getName() + "'s ban "
-                                + ban.toString());
+                        sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName());
 
                     } else {
                         sender.sendMessage(
-                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s ban " + ban.toString());
+                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s mute " + mute.toString());
 
                     }
-
                 });
 
             }
 
-        }).handle((a, ex) -> {
-            sender.sendMessage(ChatColor.RED + ex.toString());
-            ex.printStackTrace();
-            return false;
-        });
-        ;
+        }).handle(ExceptionHandlers::handleVoid);
     }
 
     UUID getId(String str) {

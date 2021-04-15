@@ -31,6 +31,8 @@ import net.noobsters.kern.paper.databases.impl.MongoHynix;
 import net.noobsters.kern.paper.punishments.PunishmentCommand;
 import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerUnbannedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerUnmutedEvent;
 
 public class ProfileManager implements Listener {
     private static @Getter Map<String, PlayerProfile> cache = Collections.synchronizedMap(new HashMap<>());
@@ -113,22 +115,41 @@ public class ProfileManager implements Listener {
         var player = e.getPlayer();
         var ban = e.getBan();
         /** If async, schedule the kick in the main thread */
-        if (Bukkit.isPrimaryThread())
-            player.kickPlayer(ban.getReason());
-        else
-            Bukkit.getScheduler().runTask(Kern.getInstance(), () -> player.kickPlayer(ban.getReason()));
+        if (player != null) {
+            if (Bukkit.isPrimaryThread())
+                player.kickPlayer(ban.getReason());
+            else
+                Bukkit.getScheduler().runTask(Kern.getInstance(), () -> player.kickPlayer(ban.getReason()));
+        }
+
         /** Broadcast the message to everyone else */
-        Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + " has been banned by " + ban.getPunisher()
+        Bukkit.broadcastMessage(ChatColor.GREEN + e.getProfile().getName() + " has been banned by " + ban.getPunisher()
                 + " for " + ban.timeLeft());
 
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerMute(PlayerMutedEvent e) {
-        var player = e.getPlayer();
+        var player = e.getProfile().getName();
         var mute = e.getMute();
-        Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + " has been muted by " + mute.getPunisher()
-                + " for " + mute.timeLeft());
+        Bukkit.broadcastMessage(
+                ChatColor.GREEN + player + " has been muted by " + mute.getPunisher() + " for " + mute.timeLeft());
+
+    }
+
+    @EventHandler
+    public void onUnmute(PlayerUnmutedEvent e) {
+        var profile = e.getProfile();
+
+        Bukkit.broadcastMessage(ChatColor.GREEN + profile.getName() + " has been unmuted.");
+
+    }
+
+    @EventHandler
+    public void onUnban(PlayerUnbannedEvent e) {
+        var profile = e.getProfile();
+
+        Bukkit.broadcastMessage(ChatColor.GREEN + profile.getName() + " has been unbanned.");
 
     }
 

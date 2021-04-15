@@ -15,12 +15,14 @@ import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import net.noobsters.kern.paper.punishments.Punishment;
 import net.noobsters.kern.paper.punishments.PunishmentType;
+import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
+import net.noobsters.kern.paper.punishments.events.PlayerUnmutedEvent;
+import net.noobsters.kern.paper.punishments.exceptions.ExceptionHandlers;
 
 @Data
 @AllArgsConstructor
@@ -92,7 +94,7 @@ public class PlayerProfile {
      */
     public Punishment isBanned() {
         for (var ban : bans)
-            if (ban.isActive())
+            if (ban.obtainActive())
                 return ban;
 
         return null;
@@ -105,7 +107,7 @@ public class PlayerProfile {
      */
     public Punishment isMuted() {
         for (var mute : mutes)
-            if (mute.isActive())
+            if (mute.obtainActive())
                 return mute;
 
         return null;
@@ -126,11 +128,7 @@ public class PlayerProfile {
             findOneAndUpdate(collection, Updates.inc("points", newPoints));
             points += newPoints;
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
 
     }
 
@@ -149,11 +147,7 @@ public class PlayerProfile {
             findOneAndUpdate(collection, Updates.inc("penalties", penaltyPoints));
             penalties += penaltyPoints;
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
     }
 
     /**
@@ -171,11 +165,7 @@ public class PlayerProfile {
             findOneAndUpdate(collection, Updates.set("shield", newShieldName));
             this.activeShield = newShieldName;
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
     }
 
     /**
@@ -195,11 +185,7 @@ public class PlayerProfile {
                 addresses.add(address);
             }
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
 
     }
 
@@ -216,11 +202,7 @@ public class PlayerProfile {
         return CompletableFuture.supplyAsync(() -> {
             findOneAndUpdate(collection, Updates.addToSet("state", state));
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
     }
 
     /**
@@ -248,38 +230,35 @@ public class PlayerProfile {
             /** Call the event with the updated data */
             Bukkit.getPluginManager().callEvent(punishment.getEvent(this, true));
             return true;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
     }
 
+    /**
+     * Method to commit a cancel an active punishment from a player's profile. It
+     * also calls {@link PlayerBannedEvent} or {@link PlayerUnmutedEvent}
+     * respectively.
+     * 
+     * @param punishment Either a ban or mute to be commited.
+     * @param collection The database collection to which you wish to commit the
+     *                   change.
+     * @return CompletableFuture<Boolean> with true signifying the change took place
+     *         and false signifying and exception.
+     */
     public CompletableFuture<Boolean> pardonPunishment(final Punishment punishment,
             MongoCollection<PlayerProfile> collection) {
         return CompletableFuture.supplyAsync(() -> {
-
             var punishmentDbName = punishment.getType().getDBName();
             var filter = Filters.and(eq("_id", this.getUuid()),
                     Filters.elemMatch(punishmentDbName, punishment.obtainMatchingFilter()));
             var updateResult = collection.updateOne(filter, Updates.set(punishmentDbName + ".$.canceled", true));
-            if (updateResult.getModifiedCount() > 0) {
+            if (updateResult.getMatchedCount() > 0) {
                 punishment.setCanceled(true);
-                if (punishmentDbName.equalsIgnoreCase("bans")) {
-                    System.out.println(bans.toString());
-                } else if (punishmentDbName.equalsIgnoreCase("mutes")) {
-                    System.out.println(mutes.toString());
-                }
                 Bukkit.getPluginManager().callEvent(punishment.getPardonEvent(this, true));
                 return true;
             }
 
             return false;
-        }).handle((ignore, ex) -> {
-            ex.printStackTrace();
-            Bukkit.broadcast(ChatColor.RED + ex.getCause().toString(), "admin.debug");
-            return false;
-        });
+        }).handle(ExceptionHandlers::handleException);
     }
 
     /**
