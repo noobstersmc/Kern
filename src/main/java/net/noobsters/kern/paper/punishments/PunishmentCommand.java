@@ -268,7 +268,7 @@ public class PunishmentCommand extends BaseCommand {
 
                     } else {
                         sender.sendMessage(
-                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s mute " + ban.toString());
+                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s ban " + ban.toString());
 
                     }
                 });
