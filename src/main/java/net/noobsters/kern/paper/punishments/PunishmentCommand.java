@@ -245,7 +245,7 @@ public class PunishmentCommand extends BaseCommand {
                             profile = optionalProfile.get();
                         } else {
                             sender.sendMessage(ChatColor.RED + nameOrId
-                                    + " can't be unmuted because they haven't joined the server before.");
+                                    + " can't be unbanned because they haven't joined the server before.");
                             return;
                         }
                     } catch (Exception e) {
@@ -255,20 +255,20 @@ public class PunishmentCommand extends BaseCommand {
                     }
                 }
 
-                var mute = profile.isMuted();
-                if (mute == null) {
+                var ban = profile.isBanned();
+                if (ban == null) {
                     sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
                     return;
                 }
-                // TODO: Pardon the muted player
+                // TODO: Pardon the banned player
                 final var prof = profile;
-                profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept((c) -> {
+                profile.pardonPunishment(ban, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
                         sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName());
 
                     } else {
                         sender.sendMessage(
-                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s mute " + mute.toString());
+                                ChatColor.RED + "Couldn't pardon " + prof.getName() + "'s mute " + ban.toString());
 
                     }
                 });
