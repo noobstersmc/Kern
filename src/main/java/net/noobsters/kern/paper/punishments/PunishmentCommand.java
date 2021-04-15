@@ -61,7 +61,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-        }).handle(ExceptionHandlers::handleVoid);
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
 
     }
 
@@ -125,7 +125,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
             sender.sendMessage("Couldn't find a player " + nameOrId);
-        }).handle(ExceptionHandlers::handleVoid);
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
 
     }
 
@@ -169,6 +169,8 @@ public class PunishmentCommand extends BaseCommand {
                         if (optionalProfile.isPresent()) {
                             profile = optionalProfile.get();
                         } else {
+                            sender.sendMessage(ChatColor.RED + nameOrId
+                                    + " can't be unmuted because they haven't joined the server before.");
                             return;
                         }
                     } catch (Exception e) {
@@ -198,7 +200,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
 
-        }).handle(ExceptionHandlers::handleVoid);
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
 
     }
 
@@ -242,6 +244,8 @@ public class PunishmentCommand extends BaseCommand {
                         if (optionalProfile.isPresent()) {
                             profile = optionalProfile.get();
                         } else {
+                            sender.sendMessage(ChatColor.RED + nameOrId
+                                    + " can't be unmuted because they haven't joined the server before.");
                             return;
                         }
                     } catch (Exception e) {
@@ -271,7 +275,7 @@ public class PunishmentCommand extends BaseCommand {
 
             }
 
-        }).handle(ExceptionHandlers::handleVoid);
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
     }
 
     UUID getId(String str) {
