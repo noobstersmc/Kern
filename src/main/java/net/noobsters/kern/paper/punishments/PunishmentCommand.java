@@ -231,40 +231,31 @@ public class PunishmentCommand extends BaseCommand {
             }
 
             if (uuid != null) {
-                var cachedProfile = ProfileManager.getCache().get(uuid.toString());
-
-                if (cachedProfile != null) {
-                    profile = cachedProfile;
-                } else {
-                    // If not cached, check the database.
-                    System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
-                            + "is not cached. Performing a lookup.");
-                    try {
-                        var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
-                        if (optionalProfile.isPresent()) {
-                            profile = optionalProfile.get();
-                        } else {
-                            sender.sendMessage(ChatColor.RED + nameOrId
-                                    + " can't be unbanned because they haven't joined the server before.");
-                            return;
-                        }
-                    } catch (Exception e) {
-                        sender.sendMessage(ChatColor.RED + e.toString());
-                        e.printStackTrace();
+                try {
+                    var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
+                    if (optionalProfile.isPresent()) {
+                        profile = optionalProfile.get();
+                    } else {
+                        sender.sendMessage(ChatColor.RED + nameOrId
+                                + " can't be unbanned because they haven't joined the server before.");
                         return;
                     }
+                } catch (Exception e) {
+                    sender.sendMessage(ChatColor.RED + e.toString());
+                    e.printStackTrace();
+                    return;
                 }
 
                 var ban = profile.isBanned();
                 if (ban == null) {
-                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
+                    sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently banned.");
                     return;
                 }
                 // TODO: Pardon the banned player
                 final var prof = profile;
                 profile.pardonPunishment(ban, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
-                        sender.sendMessage(ChatColor.GREEN + "You've succesful unmuted " + prof.getName());
+                        sender.sendMessage(ChatColor.GREEN + "You've succesful unbanned " + prof.getName());
 
                     } else {
                         sender.sendMessage(
