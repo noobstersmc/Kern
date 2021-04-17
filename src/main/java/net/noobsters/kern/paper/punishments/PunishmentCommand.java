@@ -22,6 +22,7 @@ import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.punishments.exceptions.ExceptionHandlers;
+import net.noobsters.kern.paper.punishments.gui.PunizioneGui;
 import net.noobsters.kern.paper.punishments.gui.PunizioneInfoGui;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
@@ -39,6 +40,22 @@ public class PunishmentCommand extends BaseCommand {
 
         if (profile != null) {
             var gui = new PunizioneInfoGui(profile).getGui();
+            gui.open(sender);
+        } else {
+            sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+        }
+
+    }
+
+    @Subcommand("show")
+    @CommandCompletion("@players <description>")
+    public void punishCommand(Player sender, @Name("name") String nameOrId, @Name("description") String description) {
+        var uid = getId(nameOrId);
+        var profile = instance.getProfileManager().getCollection()
+                .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+
+        if (profile != null) {
+            var gui = new PunizioneGui(profile, sender.getName(), description).getGui();
             gui.open(sender);
         } else {
             sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
