@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -75,6 +76,13 @@ public class RapidInv implements InventoryHolder {
         this.clones.add(newInventory);
 
         return newInventory;
+    }
+
+    /**
+     * Utility function to close the inventory for all open instances.
+     */
+    public void closeAll() {
+        getInventory().getViewers().forEach(HumanEntity::closeInventory);
     }
 
     /**

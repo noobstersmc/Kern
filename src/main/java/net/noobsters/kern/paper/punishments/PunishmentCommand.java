@@ -55,7 +55,7 @@ public class PunishmentCommand extends BaseCommand {
                 .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
 
         if (profile != null) {
-            var gui = new PunizioneGui(profile, sender.getName(), description).getGui();
+            var gui = new PunizioneGui(profile, sender, description).getGui();
             gui.open(sender);
         } else {
             sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
