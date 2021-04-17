@@ -1,5 +1,6 @@
 package net.noobsters.kern.paper.profiles;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -91,22 +91,48 @@ public class ProfileManager implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void checkForBlacklist(AsyncPlayerPreLoginEvent e) {
         var address = e.getAddress().getHostName();
-        var match = Filters.and(Filters.ne("_id", e.getUniqueId().toString()), Filters.in("addresses", address),
-                Filters.eq("bans.canceled", false), Filters.lt("bans.expiration", System.currentTimeMillis()));
+        var id = e.getUniqueId().toString();
+        var name = e.getName();
+
+        var someoneBannedWithSameIP = Filters.and(Filters.in("addresses", address), Filters.eq("bans.canceled", false),
+                Filters.lt("bans.expiration", System.currentTimeMillis()));
+
+        var playerIfNotBypassable = Filters.and(Filters.eq("_id", id), Filters.ne("bypass", true));
 
         var t = HTimer.start();
 
-        var profileMatch = collection.find(match).first();
-        if (profileMatch != null) {
+        var query = collection.find(Filters.or(playerIfNotBypassable, someoneBannedWithSameIP));
 
-            var b = profileMatch.isBanned();
-            if (b != null) {
-                
-                e.disallow(Result.KICK_BANNED, "Blacklisted: " + b.timeLeft());
-                System.out.println("Blacklisted");
+        var iter = query.iterator();
+        var list = new ArrayList<PlayerProfile>();
+
+        PlayerProfile ownProfile = null;
+
+        while (iter.hasNext()) {
+            var next = iter.next();
+
+            if (next.getUuid() == id) {
+                ownProfile = next;
+                continue;
+            }
+
+            list.add(next);
+            System.out.println(next.getName());
+        }
+
+        if (ownProfile == null) {
+            if (list.size() > 0) {
+                System.out.println(name + " should be banned but is allowed to bypass ipbans.");
+
+            } else {
+                System.out.println(name + " is not balcklisted at all");
             }
         } else {
-            System.out.println("Not blacklisted");
+            if (list.size() > 0) {
+                System.out.println(name + " should be blacklisted");
+            } else {
+                System.out.println(name + " is not avoiding blacklist");
+            }
         }
 
         System.out.println("Blacklist query took " + t.stop());
