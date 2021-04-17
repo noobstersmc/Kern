@@ -71,7 +71,7 @@ public class ProfileManager implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent e) {
         var id = e.getUniqueId();
         var address = e.getAddress().getHostName();
@@ -88,7 +88,7 @@ public class ProfileManager implements Listener {
 
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void checkForBlacklist(AsyncPlayerPreLoginEvent e) {
         var address = e.getAddress().getHostName();
         var id = e.getUniqueId().toString();
@@ -120,6 +120,7 @@ public class ProfileManager implements Listener {
             System.out.println(next.getName());
         }
 
+        /** Test for everything to be sure */
         if (ownProfile == null) {
             if (list.size() > 0) {
                 System.out.println(name + " should be banned but is allowed to bypass ipbans.");

@@ -59,6 +59,10 @@ public class PlayerProfile {
         this.firstJoin = System.currentTimeMillis();
     }
 
+    public long obtainLastTimeOnline(){
+        return states.get(states.size()-1).getTime();
+    }
+
     /**
      * Static constructor to quickly create a player profile
      * 

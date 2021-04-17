@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.conversions.Bson;
+import org.bukkit.Material;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -107,6 +108,10 @@ public class Punishment {
         default:
             return (E) new GenericPunishmentEvent(profile, this, async);
         }
+    }
+
+    public Material obtainType(){
+        return type == PunishmentType.BAN ? Material.MAP : Material.PAPER; 
     }
 
     /** Empty constructor for Mongo */

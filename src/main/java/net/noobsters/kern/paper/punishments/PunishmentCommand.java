@@ -3,8 +3,11 @@ package net.noobsters.kern.paper.punishments;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.mongodb.client.model.Filters;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
@@ -19,12 +22,29 @@ import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.profiles.PlayerProfile;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.punishments.exceptions.ExceptionHandlers;
+import net.noobsters.kern.paper.punishments.gui.PunizioneInfoGui;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
 @RequiredArgsConstructor
 @CommandAlias("punizione")
 public class PunishmentCommand extends BaseCommand {
     private @NonNull @Getter Kern instance;
+
+    @CommandCompletion("@players")
+    @Subcommand("profile")
+    public void reviewCommand(Player sender, @Name("name") String nameOrId) {
+        var uid = getId(nameOrId);
+        var profile = instance.getProfileManager().getCollection()
+                .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+
+        if (profile != null) {
+            var gui = new PunizioneInfoGui(profile).getGui();
+            gui.open(sender);
+        } else {
+            sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+        }
+
+    }
 
     @CommandCompletion("@players <duration> <reason>")
     @Subcommand("ban|b")
