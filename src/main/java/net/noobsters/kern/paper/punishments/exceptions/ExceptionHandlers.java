@@ -26,6 +26,14 @@ public class ExceptionHandlers {
         return result;
     }
 
+    public static Boolean handleException(Boolean result, Throwable exception, CommandSender sender) {
+        if (exception != null) {
+            sender.sendMessage(ChatColor.RED + exception.toString());
+            return false;
+        }
+        return result;
+    }
+
     public static Boolean handleVoid(Void v, Throwable exception) {
         if (exception != null) {
             broadcastException(exception);

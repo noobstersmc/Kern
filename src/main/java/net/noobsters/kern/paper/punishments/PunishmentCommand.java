@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
@@ -26,40 +27,49 @@ import net.noobsters.kern.paper.punishments.gui.PunizioneGui;
 import net.noobsters.kern.paper.punishments.gui.PunizioneInfoGui;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
+@CommandPermission("kern.punizione.command")
 @RequiredArgsConstructor
 @CommandAlias("punizione")
 public class PunishmentCommand extends BaseCommand {
     private @NonNull @Getter Kern instance;
 
-    @CommandCompletion("@players")
     @Subcommand("profile")
+    @CommandCompletion("@players")
     public void reviewCommand(Player sender, @Name("name") String nameOrId) {
-        var uid = getId(nameOrId);
-        var profile = instance.getProfileManager().getCollection()
-                .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+        CompletableFuture.supplyAsync(() -> {
+            var uid = getId(nameOrId);
+            var profile = instance.getProfileManager().getCollection()
+                    .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
 
-        if (profile != null) {
-            var gui = new PunizioneInfoGui(profile).getGui();
-            gui.open(sender);
-        } else {
-            sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
-        }
+            if (profile != null) {
+                var gui = new PunizioneInfoGui(profile).getGui();
+                Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+            } else {
+                sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+            }
+
+            return true;
+        }).handle((result, exception) -> ExceptionHandlers.handleException(result, exception, sender));
 
     }
 
-    @Subcommand("show")
+    @Subcommand("punish")
     @CommandCompletion("@players <description>")
     public void punishCommand(Player sender, @Name("name") String nameOrId, @Name("description") String description) {
-        var uid = getId(nameOrId);
-        var profile = instance.getProfileManager().getCollection()
-                .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+        CompletableFuture.supplyAsync(() -> {
+            var uid = getId(nameOrId);
+            var profile = instance.getProfileManager().getCollection()
+                    .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
 
-        if (profile != null) {
-            var gui = new PunizioneGui(profile, sender, description).getGui();
-            gui.open(sender);
-        } else {
-            sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
-        }
+            if (profile != null) {
+                var gui = new PunizioneGui(profile, sender, description).getGui();
+                Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+            } else {
+                sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+            }
+
+            return true;
+        }).handle((result, exception) -> ExceptionHandlers.handleException(result, exception, sender));
 
     }
 
