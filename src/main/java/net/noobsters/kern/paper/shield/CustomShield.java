@@ -23,4 +23,8 @@ public class CustomShield {
         this.customModelData = customModelData;
     }
 
+    public CustomShield() {
+
+    }
+
 }

@@ -18,6 +18,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.profiles.ProfileManager;
 
 @RequiredArgsConstructor
 @CommandPermission("tpworld.cmd")
@@ -31,18 +32,14 @@ public class ShieldCMD extends BaseCommand {
         sender.sendMessage("Soon...");
     }
 
-    @Subcommand("list-players")
+    @Subcommand("refresh")
     @CommandPermission("shield.admin")
     public void listPlayers(CommandSender sender) {
         var list = instance.getShieldManager().getPlayerCurrentShield();
-        sender.sendMessage(ChatColor.YELLOW + "Shield Player List: " + list.toString());
-    }
 
-    @Subcommand("list")
-    @CommandPermission("shield.admin")
-    public void chooseShield(CommandSender sender) {
-        var list = instance.getShieldManager().getGlobalShieldList();
-        sender.sendMessage(ChatColor.YELLOW + "Shield List: " + list.toString());
+        /** Query all shield locally */
+        instance.getShieldManager().getShieldCollection().find()
+                .forEach(shield -> instance.getShieldManager().getGlobalShieldList().put(shield.getName(), shield));
     }
 
     @Subcommand("reset|default")
@@ -51,26 +48,27 @@ public class ShieldCMD extends BaseCommand {
         var shieldManager = instance.getShieldManager();
         var playerCurrentShield = shieldManager.getPlayerCurrentShield();
         var uuid = player.getUniqueId().toString();
-        if(playerCurrentShield.containsKey(uuid)){
+        if (playerCurrentShield.containsKey(uuid)) {
             playerCurrentShield.remove(uuid);
 
             var inventory = player.getInventory().getContents();
             var customShield = playerCurrentShield.get(uuid);
-            Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD).forEach(shield -> {
-                if (playerCurrentShield.containsKey(uuid)) {
-                    // change shield to custom
-                    shieldManager.setCustomBanner(shield, customShield);
-                } else {
-                    // default shield
-                    shieldManager.removeCustomBanner(shield);
-                }
-            });
+            Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD)
+                    .forEach(shield -> {
+                        if (playerCurrentShield.containsKey(uuid)) {
+                            // change shield to custom
+                            shieldManager.setCustomBanner(shield, customShield);
+                        } else {
+                            // default shield
+                            shieldManager.removeCustomBanner(shield);
+                        }
+                    });
             player.sendMessage(ChatColor.GREEN + "Shield updated to default.");
 
-        }else{
+        } else {
 
             player.sendMessage(ChatColor.RED + "Your shield is already default.");
-        }   
+        }
     }
 
     @Subcommand("update")
@@ -88,15 +86,16 @@ public class ShieldCMD extends BaseCommand {
             var inventory = player.getInventory().getContents();
 
             var customShield = playerCurrentShield.get(uuid);
-            Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD).forEach(shield -> {
-                if (playerCurrentShield.containsKey(uuid)) {
-                    // change shield to custom
-                    shieldManager.setCustomBanner(shield, customShield);
-                } else {
-                    // default shield
-                    shieldManager.removeCustomBanner(shield);
-                }
-            });
+            Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD)
+                    .forEach(shield -> {
+                        if (playerCurrentShield.containsKey(uuid)) {
+                            // change shield to custom
+                            shieldManager.setCustomBanner(shield, customShield);
+                        } else {
+                            // default shield
+                            shieldManager.removeCustomBanner(shield);
+                        }
+                    });
             player.sendMessage(ChatColor.GREEN + "Custom shield updated to " + name + ".");
         }
     }
@@ -108,68 +107,73 @@ public class ShieldCMD extends BaseCommand {
         if (banner == null || !banner.getType().toString().endsWith("_BANNER")) {
             player.sendMessage(ChatColor.RED + "Couldn't find banner.");
 
-        }else {
+        } else {
 
             var color = DyeColor.WHITE;
 
             switch (banner.getType()) {
-                case BLACK_BANNER:
-                    color = DyeColor.BLACK;
-                    break;
-                case BLUE_BANNER:
-                    color = DyeColor.BLUE;
-                    break;
-                case BROWN_BANNER:
-                    color = DyeColor.BROWN;
-                    break;
-                case CYAN_BANNER:
-                    color = DyeColor.CYAN;
-                    break;
-                case GRAY_BANNER:
-                    color = DyeColor.GRAY;
-                    break;
-                case GREEN_BANNER:
-                    color = DyeColor.GREEN;
-                    break;
-                case LIGHT_BLUE_BANNER:
-                    color = DyeColor.LIGHT_BLUE;
-                    break;
-                case LIGHT_GRAY_BANNER:
-                    color = DyeColor.LIGHT_GRAY;
-                    break;
-                case LIME_BANNER:
-                    color = DyeColor.LIME;
-                    break;
-                case MAGENTA_BANNER:
-                    color = DyeColor.MAGENTA;
-                    break;
-                case ORANGE_BANNER:
-                    color = DyeColor.ORANGE;
-                    break;
-                case PINK_BANNER:
-                    color = DyeColor.PINK;
-                    break;
-                case PURPLE_BANNER:
-                    color = DyeColor.PURPLE;
-                    break;
-                case RED_BANNER:
-                    color = DyeColor.RED;
-                    break;
-                case YELLOW_BANNER:
-                    color = DyeColor.YELLOW;
-                    break;
+            case BLACK_BANNER:
+                color = DyeColor.BLACK;
+                break;
+            case BLUE_BANNER:
+                color = DyeColor.BLUE;
+                break;
+            case BROWN_BANNER:
+                color = DyeColor.BROWN;
+                break;
+            case CYAN_BANNER:
+                color = DyeColor.CYAN;
+                break;
+            case GRAY_BANNER:
+                color = DyeColor.GRAY;
+                break;
+            case GREEN_BANNER:
+                color = DyeColor.GREEN;
+                break;
+            case LIGHT_BLUE_BANNER:
+                color = DyeColor.LIGHT_BLUE;
+                break;
+            case LIGHT_GRAY_BANNER:
+                color = DyeColor.LIGHT_GRAY;
+                break;
+            case LIME_BANNER:
+                color = DyeColor.LIME;
+                break;
+            case MAGENTA_BANNER:
+                color = DyeColor.MAGENTA;
+                break;
+            case ORANGE_BANNER:
+                color = DyeColor.ORANGE;
+                break;
+            case PINK_BANNER:
+                color = DyeColor.PINK;
+                break;
+            case PURPLE_BANNER:
+                color = DyeColor.PURPLE;
+                break;
+            case RED_BANNER:
+                color = DyeColor.RED;
+                break;
+            case YELLOW_BANNER:
+                color = DyeColor.YELLOW;
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
 
-            if(customModelData == null) customModelData = 0;
+            if (customModelData == null)
+                customModelData = 0;
 
             var bannerMeta = (BannerMeta) banner.getItemMeta();
 
             var newBanner = new CustomShield(name, bannerMeta.getPatterns(), color, customModelData);
             instance.getShieldManager().getGlobalShieldList().put(name, newBanner);
-            player.sendMessage(ChatColor.GREEN + "Global banner saved as " + name + ".");
+            /** Update the player's local cache */
+            ProfileManager.getCache().get(player.getUniqueId().toString()).commitChangeOfShield(name,
+                    instance.getProfileManager().getCollection());
+            /** Add shield to collection of shields */
+            instance.getShieldManager().getShieldCollection().insertOne(newBanner);
         }
     }
 

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.profiles.ProfileManager;
 
 public class ShieldManager implements Listener {
     private @NotNull Kern instance;
@@ -41,6 +42,8 @@ public class ShieldManager implements Listener {
                 .withCodecRegistry(fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build())));
         this.shieldCollection = db.getCollection("shields", CustomShield.class);
+
+
         instance.getServer().getPluginManager().registerEvents(this, instance);
 
     }
@@ -97,7 +100,9 @@ public class ShieldManager implements Listener {
         var player = (Player) e.getView().getPlayer();
 
         var uuid = player.getUniqueId().toString();
-        var customShield = playerCurrentShield.get(uuid);
+
+        var shieldName = ProfileManager.getCache().get(uuid).getActiveShield();
+        var customShield = globalShieldList.get(shieldName);
 
         var inventory = player.getInventory().getContents();
         Arrays.stream(inventory).filter(item -> item != null && item.getType() == Material.SHIELD).forEach(shield -> {
@@ -118,7 +123,8 @@ public class ShieldManager implements Listener {
         if (entity instanceof Player && shield.getType() == Material.SHIELD) {
             var player = (Player) entity;
             var uuid = player.getUniqueId().toString();
-            var customShield = playerCurrentShield.get(uuid);
+            var shieldName = ProfileManager.getCache().get(uuid).getActiveShield();
+            var customShield = globalShieldList.get(shieldName);
 
             if (playerCurrentShield.containsKey(uuid)) {
                 // change shield to custom
@@ -135,16 +141,14 @@ public class ShieldManager implements Listener {
         var recipe = e.getRecipe();
         var uuid = e.getView().getPlayer().getUniqueId().toString();
 
-        if (playerCurrentShield.containsKey(uuid) && recipe != null
+        var currentShieldName = ProfileManager.getCache().get(uuid).getActiveShield();
+        if (globalShieldList.containsKey(currentShieldName) && recipe != null
                 && recipe.getResult().getType() == Material.SHIELD) {
 
-            var customShield = playerCurrentShield.get(uuid);
+            var customShield = globalShieldList.get(currentShieldName);
             var shield = e.getRecipe().getResult();
 
             e.getInventory().setResult(setCustomBanner(shield, customShield));
-
-            // shield.{name}
-            // shield.*
         }
     }
 

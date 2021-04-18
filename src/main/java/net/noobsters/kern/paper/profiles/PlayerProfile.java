@@ -59,10 +59,6 @@ public class PlayerProfile {
         this.firstJoin = System.currentTimeMillis();
     }
 
-    public long obtainLastTimeOnline(){
-        return states.get(states.size()-1).getTime();
-    }
-
     /**
      * Static constructor to quickly create a player profile
      * 
@@ -263,6 +259,15 @@ public class PlayerProfile {
 
             return false;
         }).handle(ExceptionHandlers::handleException);
+    }
+
+    /**
+     * Utility function that returns the last online time of a user
+     * 
+     * @return Long of player's last connection time
+     */
+    public long obtainLastTimeOnline() {
+        return states.get(states.size() - 1).getTime();
     }
 
     /**
