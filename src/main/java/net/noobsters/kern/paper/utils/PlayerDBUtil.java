@@ -8,7 +8,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -53,19 +52,4 @@ public class PlayerDBUtil {
             }
         });
     }
-
-    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-        // Query async
-        var player = PlayerDBUtil.getPlayerObjectAsync("aleiv")/** Forzar el async a syncrono */
-                .get();
-        var username = player.get("username");
-        var uuid = player.get("id");
-        // Imprime
-        print("[Query] El uuid de " + username + " es " + uuid);
-    }
-
-    private static void print(Object object) {
-        System.out.println(object);
-    }
-
 }

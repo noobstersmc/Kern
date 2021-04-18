@@ -21,7 +21,7 @@ import net.noobsters.kern.paper.Kern;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 
 @RequiredArgsConstructor
-@CommandPermission("tpworld.cmd")
+@CommandPermission("shield.cmd")
 @CommandAlias("shield|banner")
 public class ShieldCMD extends BaseCommand {
 
@@ -35,9 +35,7 @@ public class ShieldCMD extends BaseCommand {
     @Subcommand("refresh")
     @CommandPermission("shield.admin")
     public void listPlayers(CommandSender sender) {
-        var list = instance.getShieldManager().getPlayerCurrentShield();
-
-        /** Query all shield locally */
+        /** Query all shields locally */
         instance.getShieldManager().getShieldCollection().find()
                 .forEach(shield -> instance.getShieldManager().getGlobalShieldList().put(shield.getName(), shield));
     }

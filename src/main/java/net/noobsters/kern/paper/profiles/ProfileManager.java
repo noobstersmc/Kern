@@ -12,6 +12,9 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
 
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -74,8 +77,11 @@ public class ProfileManager implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent e) {
         var id = e.getUniqueId();
-        var address = e.getAddress().getHostName();
-        var query = collection.find(Filters.eq("_id", id.toString())).first();
+        var address = e.getAddress().getHostAddress();
+
+        var query = collection.findOneAndUpdate(Filters.eq("_id", id.toString()),
+                Updates.combine(Updates.set("name", e.getName()), Updates.addToSet("addresses", address)),
+                new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
 
         if (query != null) {
             query.commitAddress(address, collection);
@@ -90,7 +96,7 @@ public class ProfileManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void checkForBlacklist(AsyncPlayerPreLoginEvent e) {
-        var address = e.getAddress().getHostName();
+        var address = e.getAddress().getHostAddress();
         var id = e.getUniqueId().toString();
         var name = e.getName();
 

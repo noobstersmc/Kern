@@ -44,7 +44,7 @@ public class ShieldManager implements Listener {
         this.shieldCollection = db.getCollection("shields", CustomShield.class);
 
 
-        instance.getServer().getPluginManager().registerEvents(this, instance);
+        //instance.getServer().getPluginManager().registerEvents(this, instance);
 
     }
 

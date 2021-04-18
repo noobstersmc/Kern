@@ -39,8 +39,23 @@ public class PunishmentCommand extends BaseCommand {
     public void reviewCommand(Player sender, @Name("name") String nameOrId) {
         CompletableFuture.supplyAsync(() -> {
             var uid = getId(nameOrId);
-            var profile = instance.getProfileManager().getCollection()
-                    .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+            if (uid == null) {
+                var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrId);
+                if (offlinePlayer != null) {
+                    uid = offlinePlayer.getUniqueId();
+                } else {
+                    var lookupPlayer = PlayerDBUtil.getPlayerObject(nameOrId);
+                    if (lookupPlayer != null) {
+                        var id = lookupPlayer.get("id").getAsString();
+                        uid = UUID.fromString(id);
+                    } else {
+                        sender.sendMessage(
+                                ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                        return false;
+                    }
+                }
+            }
+            var profile = instance.getProfileManager().getCollection().find(Filters.eq("_id", uid.toString())).first();
 
             if (profile != null) {
                 var gui = new PunizioneInfoGui(profile).getGui();
@@ -59,8 +74,23 @@ public class PunishmentCommand extends BaseCommand {
     public void punishCommand(Player sender, @Name("name") String nameOrId, @Name("description") String description) {
         CompletableFuture.supplyAsync(() -> {
             var uid = getId(nameOrId);
-            var profile = instance.getProfileManager().getCollection()
-                    .find(Filters.eq(uid != null ? "_id" : "name", nameOrId)).first();
+            if (uid == null) {
+                var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrId);
+                if (offlinePlayer != null) {
+                    uid = offlinePlayer.getUniqueId();
+                } else {
+                    var lookupPlayer = PlayerDBUtil.getPlayerObject(nameOrId);
+                    if (lookupPlayer != null) {
+                        var id = lookupPlayer.get("id").getAsString();
+                        uid = UUID.fromString(id);
+                    } else {
+                        sender.sendMessage(
+                                ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                        return false;
+                    }
+                }
+            }
+            var profile = instance.getProfileManager().getCollection().find(Filters.eq("_id", uid.toString())).first();
 
             if (profile != null) {
                 var gui = new PunizioneGui(profile, sender, description).getGui();
