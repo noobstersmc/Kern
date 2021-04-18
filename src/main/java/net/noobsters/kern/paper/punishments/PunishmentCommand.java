@@ -31,6 +31,7 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil;
 @RequiredArgsConstructor
 @CommandAlias("punizione")
 public class PunishmentCommand extends BaseCommand {
+    // TODO: ENSURE ALL PUNISHMENTS ARE ENFORCED WITH LASTEST DATA
     private @NonNull @Getter Kern instance;
 
     @Subcommand("profile")
