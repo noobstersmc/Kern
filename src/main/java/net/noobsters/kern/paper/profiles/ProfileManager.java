@@ -21,6 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -34,7 +35,6 @@ import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerUnbannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerUnmutedEvent;
-import net.noobsters.kern.paper.utils.HTimer;
 
 public class ProfileManager implements Listener {
     private static @Getter Map<String, PlayerProfile> cache = Collections.synchronizedMap(new HashMap<>());
@@ -99,8 +99,6 @@ public class ProfileManager implements Listener {
 
         var playerIfNotBypassable = Filters.and(Filters.eq("_id", id), Filters.ne("bypass", true));
 
-        var t = HTimer.start();
-
         var query = collection.find(Filters.or(playerIfNotBypassable, someoneBannedWithSameIP));
 
         var iter = query.iterator();
@@ -117,26 +115,13 @@ public class ProfileManager implements Listener {
             }
 
             list.add(next);
-            System.out.println(next.getName());
         }
 
-        /** Test for everything to be sure */
-        if (ownProfile == null) {
-            if (list.size() > 0) {
-                System.out.println(name + " should be banned but is allowed to bypass ipbans.");
-
-            } else {
-                System.out.println(name + " is not balcklisted at all");
-            }
-        } else {
-            if (list.size() > 0) {
-                System.out.println(name + " should be blacklisted");
-            } else {
-                System.out.println(name + " is not avoiding blacklist");
-            }
+        if (ownProfile != null && list.size() > 0) {
+            System.out.println(name + " should be blacklisted");
+            e.disallow(Result.KICK_BANNED,
+                    ChatColor.RED + "You are bypassing a ban on " + list.get(0).getName() + "'s account.");
         }
-
-        System.out.println("Blacklist query took " + t.stop());
 
     }
 
