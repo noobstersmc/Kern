@@ -2,7 +2,9 @@ package net.noobsters.kern.paper.punishments.gui;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -20,13 +22,16 @@ import net.noobsters.kern.paper.punishments.Punishment;
 public class PunizioneInfoGui {
 
     private static DateFormat format = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss");
+    static {
+        format.setTimeZone(TimeZone.getTimeZone(ZoneId.of("America/New_York")));
+    }
     public @Getter RapidInv gui;
 
     public PunizioneInfoGui(PlayerProfile profile) {
         var name = profile.getName();
         var uuid = profile.getUuid();
 
-        var totalRows = (int) Math.ceil((profile.getBans().size() + profile.getMutes().size()) / 9);
+        var totalRows = (int) Math.ceil((profile.getBans().size() + profile.getMutes().size()) / 9) + 1;
         gui = new RapidInv(9 * totalRows, "Info player " + name);
 
         var penalties = profile.getPenalties();
