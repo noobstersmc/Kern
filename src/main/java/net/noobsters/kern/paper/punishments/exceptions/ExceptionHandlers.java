@@ -29,6 +29,7 @@ public class ExceptionHandlers {
     public static Boolean handleException(Boolean result, Throwable exception, CommandSender sender) {
         if (exception != null) {
             sender.sendMessage(ChatColor.RED + exception.toString());
+            exception.printStackTrace();
             return false;
         }
         return result;

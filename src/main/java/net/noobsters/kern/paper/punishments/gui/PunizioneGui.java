@@ -33,7 +33,7 @@ public class PunizioneGui {
                     System.currentTimeMillis() + BanUnits.parseString(currentPoints * 12 + "h"),
                     System.currentTimeMillis(), PunishmentType.BAN, false), getCollection());
 
-            gui.closeAll();
+            click.getWhoClicked().closeInventory();
         });
 
         var spam = new ItemBuilder(Material.MAP).name(ChatColor.YELLOW + "Spam / Flood")
@@ -45,7 +45,7 @@ public class PunizioneGui {
                     System.currentTimeMillis() + BanUnits.parseString(currentPoints * 2 + "h"),
                     System.currentTimeMillis(), PunishmentType.MUTE, false), getCollection());
 
-            gui.closeAll();
+            click.getWhoClicked().closeInventory();
 
         });
 
@@ -59,7 +59,7 @@ public class PunizioneGui {
                     System.currentTimeMillis() + BanUnits.parseString(currentPoints * 2 + "h"),
                     System.currentTimeMillis(), PunishmentType.MUTE, false), getCollection());
 
-            gui.closeAll();
+            click.getWhoClicked().closeInventory();
         });
 
         var sports = new ItemBuilder(Material.BARRIER).name(ChatColor.GOLD + "Bad Sportsmanship")
@@ -78,7 +78,8 @@ public class PunizioneGui {
 
             }
             profile.commitPenalty(3, getCollection());
-            gui.closeAll();
+
+            click.getWhoClicked().closeInventory();
         });
 
         var hate = new ItemBuilder(Material.WITHER_ROSE).name(ChatColor.GOLD + "Hate Speech")
@@ -97,7 +98,8 @@ public class PunizioneGui {
 
             }
             profile.commitPenalty(3, getCollection());
-            gui.closeAll();
+
+            click.getWhoClicked().closeInventory();
         });
 
         var hack = new ItemBuilder(Material.NETHERITE_SCRAP).name(ChatColor.DARK_RED + "Hacked Client")
@@ -107,7 +109,8 @@ public class PunizioneGui {
                     System.currentTimeMillis() + BanUnits.parseString("10y"), System.currentTimeMillis(),
                     PunishmentType.BAN, false), getCollection());
             profile.commitPenalty(12, getCollection());
-            gui.closeAll();
+
+            click.getWhoClicked().closeInventory();
         });
 
     }

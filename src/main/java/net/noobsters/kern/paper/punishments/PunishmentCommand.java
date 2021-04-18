@@ -142,7 +142,7 @@ public class PunishmentCommand extends BaseCommand {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
                 if (cachedProfile == null) {
                     System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
-                            + "is not cached. Performing a lookup.");
+                            + " is not cached. Performing a lookup.");
                     try {
                         var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
                         if (optionalProfile.isPresent()) {
@@ -210,7 +210,7 @@ public class PunishmentCommand extends BaseCommand {
                 } else {
                     // If not cached, check the database.
                     System.out.println(ChatColor.YELLOW + "[Punizione] Player " + nameOrId
-                            + "is not cached. Performing a lookup.");
+                            + " is not cached. Performing a lookup.");
                     try {
                         var optionalProfile = instance.getProfileManager().queryPlayer(uuid).get();
                         if (optionalProfile.isPresent()) {
