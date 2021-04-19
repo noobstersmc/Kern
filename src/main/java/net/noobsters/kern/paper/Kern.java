@@ -6,7 +6,6 @@ import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.noobsters.kern.paper.chat.ChatManager;
 import net.noobsters.kern.paper.commands.GlobalMute;
-import net.noobsters.kern.paper.commands.SpecChat;
 import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
@@ -43,7 +42,6 @@ public class Kern extends JavaPlugin {
 
     // commands
     commandManager.registerCommand(new ShieldCMD(this));
-    commandManager.registerCommand(new SpecChat(this));
     commandManager.registerCommand(new GlobalMute(this));
 
     /** Do this last always */

@@ -48,8 +48,7 @@ public class ReflexUtils {
     }
 
     public static Object getPacketPlayOutPlayerInfo(ReflexPlayerInfoAction action, Player player) throws Exception {
-        var entityPlayer = getEntityPlayer(player);
-        
+        // var entityPlayer = getEntityPlayer(player);
 
         return null;
     }

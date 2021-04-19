@@ -74,7 +74,7 @@ public class ProfileManager implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent e) {
         var id = e.getUniqueId();
         var address = e.getAddress().getHostAddress();

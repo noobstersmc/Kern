@@ -23,7 +23,7 @@ import net.noobsters.kern.paper.Kern;
 @RequiredArgsConstructor
 public class ChatListener implements Listener {
     private Kern instance;
-    private String format = "&7{prefix}{name}{suffix}:&f {message}";
+    private static String format = "&7{prefix}{name}{suffix}:&f {message}";
     private HashMap<UUID, Long> chatCoolDown = new HashMap<>();
 
     public ChatListener(final Kern instance) {
@@ -40,7 +40,7 @@ public class ChatListener implements Listener {
         var msg = e.getMessage();
 
         // Edge cases start
-        
+
         if (msg.startsWith("!")) {
             e.setMessage(msg.replaceFirst("!", ""));
             if (player.getGameMode() == GameMode.SPECTATOR && !player.hasPermission("uhc.chat.spec")) {
@@ -48,7 +48,7 @@ public class ChatListener implements Listener {
                 e.setCancelled(true);
             }
             return;
-        }else if (msg.startsWith("@") && player.hasPermission("uhc.chat.spec")) {
+        } else if (msg.startsWith("@") && player.hasPermission("uhc.chat.spec")) {
             e.setMessage(msg.replaceFirst("@", ""));
             sendSpecMessage(player, msg);
             e.setCancelled(true);
@@ -76,7 +76,8 @@ public class ChatListener implements Listener {
                         message);
 
         Bukkit.getOnlinePlayers().forEach(all -> {
-            if (!instance.getChatManager().isSpecChat() || all.getGameMode() == GameMode.SPECTATOR || all.hasPermission("uhc.chat.spec")) {
+            if (!instance.getChatManager().isSpecChat() || all.getGameMode() == GameMode.SPECTATOR
+                    || all.hasPermission("uhc.chat.spec")) {
                 all.sendMessage(msg);
             }
         });
@@ -104,13 +105,14 @@ public class ChatListener implements Listener {
     /*
      * Chat formatters.
      */
-    
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void coolDown(AsyncPlayerChatEvent e) {
 
-        if(!chatCoolDown.containsKey(e.getPlayer().getUniqueId()) || (chatCoolDown.get(e.getPlayer().getUniqueId()) - System.currentTimeMillis()) <= 0){
+        if (!chatCoolDown.containsKey(e.getPlayer().getUniqueId())
+                || (chatCoolDown.get(e.getPlayer().getUniqueId()) - System.currentTimeMillis()) <= 0) {
             chatCoolDown.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + 2_000);
-        }else if(chatCoolDown.containsKey(e.getPlayer().getUniqueId()) && !e.getPlayer().hasPermission("chat.spam")){
+        } else if (chatCoolDown.containsKey(e.getPlayer().getUniqueId()) && !e.getPlayer().hasPermission("chat.spam")) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatColor.RED + "You can chat every 2 seconds.");
         }
