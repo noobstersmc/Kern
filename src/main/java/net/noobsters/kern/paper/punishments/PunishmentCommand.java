@@ -105,6 +105,7 @@ public class PunishmentCommand extends BaseCommand {
     }
 
     @CommandCompletion("@players <duration> <reason>")
+    @CommandPermission("kern.punizione.customdata")
     @Subcommand("ban|b")
     public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
             @Name("Reason") String reason) {
@@ -144,6 +145,7 @@ public class PunishmentCommand extends BaseCommand {
     }
 
     @CommandCompletion("@players <duration> <reason>")
+    @CommandPermission("kern.punizione.customdata")
     @Subcommand("mute|m")
     public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
             @Name("Reason") String reason) {
@@ -209,6 +211,7 @@ public class PunishmentCommand extends BaseCommand {
 
     @CommandCompletion("@players")
     @Subcommand("unmute|um")
+    @CommandPermission("kern.punizione.customdata")
     public void unMute(CommandSender sender, @Name("name") String nameOrId) {
         CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
@@ -284,6 +287,7 @@ public class PunishmentCommand extends BaseCommand {
 
     @CommandCompletion("@players")
     @Subcommand("unban|pardon")
+    @CommandPermission("kern.punizione.customdata")
     public void unBan(CommandSender sender, @Name("name") String nameOrId) {
         CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
