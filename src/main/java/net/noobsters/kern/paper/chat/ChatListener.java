@@ -105,7 +105,6 @@ public class ChatListener implements Listener {
     /*
      * Chat formatters.
      */
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void coolDown(AsyncPlayerChatEvent e) {
 

@@ -19,7 +19,7 @@ public class PunizioneGui {
 
     public @Getter RapidInv gui;
 
-    public PunizioneGui(PlayerProfile profile, CommandSender sender, String description) {
+    public PunizioneGui(final PlayerProfile profile, CommandSender sender, String description) {
         gui = new RapidInv(9, "Punizione || " + profile.getName());
 
         var currentPoints = profile.getPenalties() + 1;

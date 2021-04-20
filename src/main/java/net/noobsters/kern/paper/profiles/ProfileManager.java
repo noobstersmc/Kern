@@ -65,6 +65,15 @@ public class ProfileManager implements Listener {
             e.printStackTrace();
         }
     }
+    /**
+     * Static function to quickly update the cached profile of a player.
+     * @param uuid
+     * @param profile
+     * @return
+     */
+    public static PlayerProfile putInCache(String uuid, PlayerProfile profile){
+        return cache.put(uuid, profile);
+    }
 
     public CompletableFuture<Optional<PlayerProfile>> queryPlayer(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
