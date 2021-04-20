@@ -229,12 +229,16 @@ public class ProfileManager implements Listener {
         var player = e.getPlayer();
         var id = player.getUniqueId().toString();
         var profile = cache.get(id);
-        var mute = profile.isMuted();
-        if (mute != null) {
-            e.setCancelled(true);
-
-            var reason = mute.getReason().split("-")[0];
-            player.sendMessage(ChatColor.RED + "You are currently muted for " + reason + " (" + mute.timeLeft() + ")");
+        if (profile != null) {
+            var mute = profile.isMuted();
+            if (mute != null) {
+                e.setCancelled(true);
+                var reason = mute.getReason().split("-")[0];
+                player.sendMessage(
+                        ChatColor.RED + "You are currently muted for " + reason + " (" + mute.timeLeft() + ")");
+            }
+        } else {
+            instance.getProfileManager().queryPlayer(player.getUniqueId());
 
         }
 
