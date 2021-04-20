@@ -115,6 +115,10 @@ public class PunishmentCommand extends BaseCommand {
             if (uid != null) {
                 var profile = instance.getProfileManager().queryAndCachePlayer(uid);
 
+                if(profile.isEmpty()){
+                    
+                }
+
                 if (profile.isPresent()) {
                     var gui = new PunizioneGui(profile.get(), sender, description).getGui();
                     Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
@@ -136,17 +140,8 @@ public class PunishmentCommand extends BaseCommand {
     public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("duration") String duration,
             @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
-            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
-            UUID uuid = null;
-
-            if (target == null) {
-                var id = getId(nameOrId);
-                if (id != null) {
-                    uuid = id;
-                }
-            } else {
-                uuid = target.getUniqueId();
-            }
+            var uuid = obtainUUID(nameOrId);
+            PlayerProfile profile = null;
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
@@ -176,26 +171,8 @@ public class PunishmentCommand extends BaseCommand {
     public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("duration") String duration,
             @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
-            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
-            UUID uuid = null;
-
-            if (target == null) {
-                var id = getId(nameOrId);
-                if (id != null) {
-                    uuid = id;
-                } else {
-                    var playerLookupObject = PlayerDBUtil.getPlayerObject(nameOrId);
-                    if (playerLookupObject != null) {
-                        uuid = UUID.fromString(playerLookupObject.get("id").getAsString());
-                    } else {
-                        sender.sendMessage(ChatColor.RED + "No player named " + nameOrId
-                                + " could be found in the mojang record.");
-                        return;
-                    }
-                }
-            } else {
-                uuid = target.getUniqueId();
-            }
+            var uuid = obtainUUID(nameOrId);
+            PlayerProfile profile = null;
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
@@ -240,27 +217,8 @@ public class PunishmentCommand extends BaseCommand {
     @CommandPermission("kern.punizione.customdata")
     public void unMute(CommandSender sender, @Name("name") String nameOrId) {
         CompletableFuture.runAsync(() -> {
-            var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
-            UUID uuid = null;
+            var uuid = obtainUUID(nameOrId);
             PlayerProfile profile = null;
-
-            if (target == null) {
-                var id = getId(nameOrId);
-                if (id != null) {
-                    uuid = id;
-                } else {
-                    var playerLookupObject = PlayerDBUtil.getPlayerObject(nameOrId);
-                    if (playerLookupObject != null) {
-                        uuid = UUID.fromString(playerLookupObject.get("id").getAsString());
-                    } else {
-                        sender.sendMessage(ChatColor.RED + "No player named " + nameOrId
-                                + " could be found in the mojang record.");
-                        return;
-                    }
-                }
-            } else {
-                uuid = target.getUniqueId();
-            }
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());

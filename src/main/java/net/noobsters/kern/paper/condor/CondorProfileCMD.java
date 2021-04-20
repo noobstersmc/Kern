@@ -45,7 +45,8 @@ public class CondorProfileCMD extends BaseCommand {
 
     }
 
-    @Subcommand("get-token")
+    @CommandCompletion("<token>")
+    @Subcommand("get token")
     public void getProfileFromToken(CommandSender sender, @Name("userToken") String token) {
         var condorProfile = condorManager.getCondorCollection().find(Filters.eq("token", token)).first();
         if (condorProfile != null) {
@@ -54,6 +55,12 @@ public class CondorProfileCMD extends BaseCommand {
         } else {
             sender.sendMessage("Couldn't find a profile for your given token.");
         }
+
+    }
+
+    @CommandCompletion("<token>")
+    @Subcommand("get active")
+    public void getInstances(CommandSender sender, @Name("userToken") String token) {
 
     }
 
@@ -85,21 +92,21 @@ public class CondorProfileCMD extends BaseCommand {
 
     private Bson obtainFieldUpdate(String fieldName, String newValue) {
         switch (fieldName.toLowerCase()) {
-            case "name": {
-                return Updates.set("name", newValue);
-            }
-            case "token": {
-                return Updates.set("token", newValue);
-            }
-            case "credits": {
-                return Updates.set("credits", Double.parseDouble(newValue));
-            }
-            case "limit": {
-                return Updates.set("instance_limit", Integer.parseInt(newValue));
-            }
-            case "super": {
-                return Updates.set("super_token", Boolean.parseBoolean(newValue));
-            }
+        case "name": {
+            return Updates.set("name", newValue);
+        }
+        case "token": {
+            return Updates.set("token", newValue);
+        }
+        case "credits": {
+            return Updates.set("credits", Double.parseDouble(newValue));
+        }
+        case "limit": {
+            return Updates.set("instance_limit", Integer.parseInt(newValue));
+        }
+        case "super": {
+            return Updates.set("super_token", Boolean.parseBoolean(newValue));
+        }
         }
         return null;
     }
