@@ -192,8 +192,8 @@ public class ProfileManager implements Listener {
 
         /** Broadcast the message to everyone else */
         var reason = ban.getReason().split("-")[0];
-        Bukkit.broadcastMessage(ChatColor.of("#99320F") + e.getProfile().getName() + " has been banned for " + reason
-                + ". " + ban.timeLeft());
+        Bukkit.broadcastMessage(ChatColor.of("#97559b") + e.getProfile().getName() + " has been banned for " + reason
+                + "" + ban.timeLeft());
 
     }
 
@@ -204,7 +204,7 @@ public class ProfileManager implements Listener {
 
         var reason = mute.getReason().split("-")[0];
         Bukkit.broadcastMessage(
-                ChatColor.of("#99320F") + player + " has been muted for " + reason + ". " + mute.timeLeft());
+            ChatColor.of("#97559b") + player + " has been muted for " + reason + "" + mute.timeLeft());
 
     }
 
@@ -212,7 +212,7 @@ public class ProfileManager implements Listener {
     public void onUnmute(PlayerUnmutedEvent e) {
         var profile = e.getProfile();
 
-        Bukkit.broadcastMessage(ChatColor.of("#99320F") + profile.getName() + " has been unmuted.");
+        Bukkit.broadcastMessage(ChatColor.of("#97559b") + profile.getName() + " has been unmuted.");
 
     }
 
@@ -220,7 +220,7 @@ public class ProfileManager implements Listener {
     public void onUnban(PlayerUnbannedEvent e) {
         var profile = e.getProfile();
 
-        Bukkit.broadcastMessage(ChatColor.of("#99320F") + profile.getName() + " has been unbanned.");
+        Bukkit.broadcastMessage(ChatColor.of("#97559b") + profile.getName() + " has been unbanned.");
 
     }
 
