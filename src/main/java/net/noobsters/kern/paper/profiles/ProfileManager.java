@@ -66,37 +66,6 @@ public class ProfileManager implements Listener {
         }
     }
 
-    /**
-     * Static function to quickly update the cached profile of a player.
-     * 
-     * @param uuid
-     * @param profile
-     * @return The previous profile associated with the key or null.
-     */
-    public static PlayerProfile putInCache(String uuid, PlayerProfile profile) {
-        return cache.put(uuid, profile);
-    }
-
-    public CompletableFuture<Optional<PlayerProfile>> queryPlayer(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            var profile = collection.find(Filters.eq("_id", uuid.toString())).first();
-            if (profile != null) {
-                putInCache(uuid.toString(), profile);
-            }
-
-            return Optional.ofNullable(profile);
-        });
-    }
-
-    public Optional<PlayerProfile> queryAndCachePlayer(UUID uuid) {
-        var profile = collection.find(Filters.eq("_id", uuid.toString())).first();
-        if (profile != null) {
-            putInCache(uuid.toString(), profile);
-        }
-        return Optional.ofNullable(profile);
-
-    }
-
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent e) {
         var id = e.getUniqueId();
@@ -241,6 +210,56 @@ public class ProfileManager implements Listener {
             instance.getProfileManager().queryPlayer(player.getUniqueId());
 
         }
+
+    }
+
+    /**
+     * Static function to quickly update the cached profile of a player.
+     * 
+     * @param uuid    Stringified uuid for the key.
+     * @param profile PlayerProfile to be cached.
+     * @return The previous profile associated with the key or null.
+     */
+    public static PlayerProfile putInCache(String uuid, PlayerProfile profile) {
+        return cache.put(uuid, profile);
+
+    }
+
+    /**
+     * Static function to quickly update the cached profile of a player.
+     * 
+     * @param uuid    UUID for the key.
+     * @param profile PlayerProfile to be cached.
+     * @return The previous profile associated with the key or null.
+     */
+    public static PlayerProfile putInCache(UUID uuid, PlayerProfile profile) {
+        return putInCache(uuid.toString(), profile);
+    }
+
+    /**
+     * Asynchronously supplied function that queries and updates a player cache.
+     * 
+     * @param uuid UUID of the player to be requeried and recached.
+     * @return Optional, nullable, PlayerProfile object.
+     */
+    public CompletableFuture<Optional<PlayerProfile>> queryPlayer(UUID uuid) {
+        return CompletableFuture.supplyAsync(() -> {
+            return queryAndCachePlayer(uuid);
+        });
+    }
+
+    /**
+     * Fnction that queries and updates a player cache.
+     * 
+     * @param uuid UUID of the player to be requeried and recached.
+     * @return Optional, nullable, PlayerProfile object.
+     */
+    public Optional<PlayerProfile> queryAndCachePlayer(UUID uuid) {
+        var profile = collection.find(Filters.eq("_id", uuid.toString())).first();
+        if (profile != null) {
+            putInCache(uuid, profile);
+        }
+        return Optional.ofNullable(profile);
 
     }
 
