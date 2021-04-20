@@ -20,7 +20,7 @@ import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 
 @CommandPermission("condor.cmd")
-@CommandAlias("condor")
+@CommandAlias("tokens")
 public class CondorProfileCMD extends BaseCommand {
     private @Getter CondorManager condorManager;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -30,7 +30,7 @@ public class CondorProfileCMD extends BaseCommand {
     }
 
     @CommandCompletion("Integer")
-    @Subcommand("get all")
+    @Subcommand("get-all")
     public void getAll(CommandSender sender, @Name("page") @Default("0") Integer page) {
         var offset = page;
         var query = condorManager.getCondorCollection().find().limit(5).skip((offset));
@@ -45,7 +45,7 @@ public class CondorProfileCMD extends BaseCommand {
 
     }
 
-    @Subcommand("get token")
+    @Subcommand("get-token")
     public void getProfileFromToken(CommandSender sender, @Name("userToken") String token) {
         var condorProfile = condorManager.getCondorCollection().find(Filters.eq("token", token)).first();
         if (condorProfile != null) {
@@ -58,7 +58,7 @@ public class CondorProfileCMD extends BaseCommand {
     }
 
     @CommandCompletion("token @condor_fields")
-    @Subcommand("edit token")
+    @Subcommand("edit-token")
     public void editProfileToken(CommandSender sender, @Default("own") @Name("userToken") String token,
             @Name("field-to-edit") String fieldName, @Name("new-field-value") String value) {
         if (token.equalsIgnoreCase("own") && sender instanceof Player) {

@@ -33,6 +33,7 @@ public class PunishmentCommand extends BaseCommand {
     private @NonNull @Getter Kern instance;
 
     @Subcommand("pp add")
+    @CommandPermission("kern.punizione.customdata")
     @CommandCompletion("@players <points>")
     public void updatePoints(CommandSender sender, @Name("name") String nameOrId, @Name("points") Integer points) {
         CompletableFuture.supplyAsync(() -> {
@@ -62,6 +63,7 @@ public class PunishmentCommand extends BaseCommand {
     }
 
     @Subcommand("pp get")
+    @CommandPermission("kern.punizione.customdata")
     @CommandCompletion("@players")
     public void getpoints(CommandSender sender, @Name("name") String nameOrId) {
         CompletableFuture.supplyAsync(() -> {
