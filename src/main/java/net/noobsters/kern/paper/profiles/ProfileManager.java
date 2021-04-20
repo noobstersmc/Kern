@@ -168,8 +168,8 @@ public class ProfileManager implements Listener {
         }
 
         /** Broadcast the message to everyone else */
-        Bukkit.broadcastMessage(ChatColor.GREEN + e.getProfile().getName() + " has been banned by " + ban.getPunisher()
-                + " for " + ban.timeLeft());
+        var reason = ban.getReason().split("-")[0];
+        Bukkit.broadcastMessage(ChatColor.of("#99320F") + e.getProfile().getName() + " has been banned for " + reason + ". " + ban.timeLeft());
 
     }
 
@@ -177,8 +177,10 @@ public class ProfileManager implements Listener {
     public void onPlayerMute(PlayerMutedEvent e) {
         var player = e.getProfile().getName();
         var mute = e.getMute();
+
+        var reason = mute.getReason().split("-")[0];
         Bukkit.broadcastMessage(
-                ChatColor.GREEN + player + " has been muted by " + mute.getPunisher() + " for " + mute.timeLeft());
+            ChatColor.of("#99320F") + player + " has been muted for " + reason + ". " + mute.timeLeft());
 
     }
 
@@ -186,7 +188,7 @@ public class ProfileManager implements Listener {
     public void onUnmute(PlayerUnmutedEvent e) {
         var profile = e.getProfile();
 
-        Bukkit.broadcastMessage(ChatColor.GREEN + profile.getName() + " has been unmuted.");
+        Bukkit.broadcastMessage(ChatColor.of("#99320F") + profile.getName() + " has been unmuted.");
 
     }
 
@@ -194,7 +196,7 @@ public class ProfileManager implements Listener {
     public void onUnban(PlayerUnbannedEvent e) {
         var profile = e.getProfile();
 
-        Bukkit.broadcastMessage(ChatColor.GREEN + profile.getName() + " has been unbanned.");
+        Bukkit.broadcastMessage(ChatColor.of("#99320F") + profile.getName() + " has been unbanned.");
 
     }
 
@@ -206,8 +208,10 @@ public class ProfileManager implements Listener {
         var mute = profile.isMuted();
         if (mute != null) {
             e.setCancelled(true);
+
+            var reason = mute.getReason().split("-")[0];
             player.sendMessage(
-                    ChatColor.RED + "You are currently muted for " + mute.getReason() + " (" + mute.timeLeft() + ")");
+                    ChatColor.RED + "You are currently muted for " + reason + " (" + mute.timeLeft() + ")");
 
         }
 
