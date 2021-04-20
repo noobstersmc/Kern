@@ -230,7 +230,7 @@ public class PlayerProfile {
             /** Call the event with the updated data */
             Bukkit.getPluginManager().callEvent(punishment.getEvent(this, true));
             /** Update the cache */
-            ProfileManager.putInCache(uuid, this);
+            //ProfileManager.putInCache(uuid, this);
             return true;
         }).handle(ExceptionHandlers::handleException);
     }

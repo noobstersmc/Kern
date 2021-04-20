@@ -3,8 +3,6 @@ package net.noobsters.kern.paper.punishments;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import com.mongodb.client.model.Filters;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -34,34 +32,72 @@ public class PunishmentCommand extends BaseCommand {
     // TODO: ENSURE ALL PUNISHMENTS ARE ENFORCED WITH LASTEST DATA
     private @NonNull @Getter Kern instance;
 
+    @Subcommand("pp add")
+    @CommandCompletion("@players <points>")
+    public void updatePoints(CommandSender sender, @Name("name") String nameOrId, @Name("points") Integer points) {
+        CompletableFuture.supplyAsync(() -> {
+            var uid = obtainUUID(nameOrId);
+            if (uid != null) {
+                var profile = instance.getProfileManager().queryAndCachePlayer(uid);
+                if (profile.isPresent()) {
+                    var p = profile.get();
+                    p.commitPenalty(points, instance.getProfileManager().getCollection()).thenAccept(a -> {
+                        if (a) {
+                            sender.sendMessage(
+                                    ChatColor.GREEN + "Penalty points have been updated to " + p.getPenalties());
+                        } else {
+                            sender.sendMessage(ChatColor.RED
+                                    + "Change on penalty points could not be updated. Please report this.");
+                        }
+                    });
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + nameOrId + " is not a minecraft user or uuid.");
+            }
+
+            return true;
+        }).handle((result, exception) -> ExceptionHandlers.handleException(result, exception, sender));
+
+    }
+
+    @Subcommand("pp get")
+    @CommandCompletion("@players")
+    public void getpoints(CommandSender sender, @Name("name") String nameOrId) {
+        CompletableFuture.supplyAsync(() -> {
+            var uid = obtainUUID(nameOrId);
+            if (uid != null) {
+                var profile = instance.getProfileManager().queryAndCachePlayer(uid);
+                if (profile.isPresent()) {
+                    var p = profile.get();
+                    sender.sendMessage(ChatColor.GREEN + p.getName() + " has " + p.getPenalties() + " penalty points.");
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + nameOrId + " is not a minecraft user or uuid.");
+            }
+
+            return true;
+        }).handle((result, exception) -> ExceptionHandlers.handleException(result, exception, sender));
+
+    }
+
     @Subcommand("profile")
     @CommandCompletion("@players")
     public void reviewCommand(Player sender, @Name("name") String nameOrId) {
         CompletableFuture.supplyAsync(() -> {
-            var uid = getId(nameOrId);
-            if (uid == null) {
-                var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrId);
-                if (offlinePlayer != null) {
-                    uid = offlinePlayer.getUniqueId();
-                } else {
-                    var lookupPlayer = PlayerDBUtil.getPlayerObject(nameOrId);
-                    if (lookupPlayer != null) {
-                        var id = lookupPlayer.get("id").getAsString();
-                        uid = UUID.fromString(id);
-                    } else {
-                        sender.sendMessage(
-                                ChatColor.RED + "The profile you requested hasn't joined the server before...");
-                        return false;
-                    }
-                }
-            }
-            var profile = instance.getProfileManager().getCollection().find(Filters.eq("_id", uid.toString())).first();
+            var uid = obtainUUID(nameOrId);
+            if (uid != null) {
+                var profile = instance.getProfileManager().queryAndCachePlayer(uid);
 
-            if (profile != null) {
-                var gui = new PunizioneInfoGui(profile).getGui();
-                Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+                if (profile.isPresent()) {
+                    var gui = new PunizioneInfoGui(profile.get()).getGui();
+                    Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+                } else {
+                    sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                }
             } else {
-                sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                sender.sendMessage(ChatColor.RED + nameOrId + " is not a minecraft user or uuid.");
             }
 
             return true;
@@ -73,30 +109,18 @@ public class PunishmentCommand extends BaseCommand {
     @CommandCompletion("@players <description>")
     public void punishCommand(Player sender, @Name("name") String nameOrId, @Name("description") String description) {
         CompletableFuture.supplyAsync(() -> {
-            var uid = getId(nameOrId);
-            if (uid == null) {
-                var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrId);
-                if (offlinePlayer != null) {
-                    uid = offlinePlayer.getUniqueId();
-                } else {
-                    var lookupPlayer = PlayerDBUtil.getPlayerObject(nameOrId);
-                    if (lookupPlayer != null) {
-                        var id = lookupPlayer.get("id").getAsString();
-                        uid = UUID.fromString(id);
-                    } else {
-                        sender.sendMessage(
-                                ChatColor.RED + "The profile you requested hasn't joined the server before...");
-                        return false;
-                    }
-                }
-            }
-            var profile = instance.getProfileManager().getCollection().find(Filters.eq("_id", uid.toString())).first();
+            var uid = obtainUUID(nameOrId);
+            if (uid != null) {
+                var profile = instance.getProfileManager().queryAndCachePlayer(uid);
 
-            if (profile != null) {
-                var gui = new PunizioneGui(profile, sender, description).getGui();
-                Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+                if (profile.isPresent()) {
+                    var gui = new PunizioneGui(profile.get(), sender, description).getGui();
+                    Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
+                } else {
+                    sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                }
             } else {
-                sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                sender.sendMessage(ChatColor.RED + nameOrId + " is not a minecraft user or uuid.");
             }
 
             return true;
@@ -107,8 +131,8 @@ public class PunishmentCommand extends BaseCommand {
     @CommandCompletion("@players <duration> <reason>")
     @CommandPermission("kern.punizione.customdata")
     @Subcommand("ban|b")
-    public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
-            @Name("Reason") String reason) {
+    public void banCommand(CommandSender sender, @Name("name") String nameOrId, @Name("duration") String duration,
+            @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
             UUID uuid = null;
@@ -147,8 +171,8 @@ public class PunishmentCommand extends BaseCommand {
     @CommandCompletion("@players <duration> <reason>")
     @CommandPermission("kern.punizione.customdata")
     @Subcommand("mute|m")
-    public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("Duration") String duration,
-            @Name("Reason") String reason) {
+    public void muteCommand(CommandSender sender, @Name("name") String nameOrId, @Name("duration") String duration,
+            @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
             var target = Bukkit.getOfflinePlayerIfCached(nameOrId);
             UUID uuid = null;
@@ -351,14 +375,6 @@ public class PunishmentCommand extends BaseCommand {
         }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
     }
 
-    UUID getId(String str) {
-        try {
-            return UUID.fromString(str);
-        } catch (Exception e) {
-        }
-        return null;
-    }
-
     @CommandCompletion("@players")
     @Subcommand("record")
     public void playerRecord(CommandSender sender, String name) {
@@ -385,4 +401,42 @@ public class PunishmentCommand extends BaseCommand {
 
     }
 
+    /**
+     * Utility function to lookup the uuid of the name of a player. If the provided
+     * string is a UUID, it will return itself.
+     * 
+     * @param nameOrId Name or Stringified {@link UUID}
+     * @return {@link UUID} or null if not present anywhere
+     */
+    private static UUID obtainUUID(String nameOrId) {
+        var uid = getId(nameOrId);
+        if (uid == null) {
+            var offlinePlayer = Bukkit.getOfflinePlayerIfCached(nameOrId);
+            if (offlinePlayer != null) {
+                uid = offlinePlayer.getUniqueId();
+            } else {
+                var lookupPlayer = PlayerDBUtil.getPlayerObject(nameOrId);
+                if (lookupPlayer != null) {
+                    var id = lookupPlayer.get("id").getAsString();
+                    uid = UUID.fromString(id);
+                }
+            }
+        }
+        return uid;
+    }
+
+    /**
+     * Utility function that attempts to parse a stringfied {@link UUID} into an
+     * object {@link UUID}.
+     * 
+     * @param str Stringified UUID
+     * @return {@link UUID} or null if not parseable
+     */
+    private static UUID getId(String str) {
+        try {
+            return UUID.fromString(str);
+        } catch (Exception e) {
+        }
+        return null;
+    }
 }

@@ -65,22 +65,36 @@ public class ProfileManager implements Listener {
             e.printStackTrace();
         }
     }
+
     /**
      * Static function to quickly update the cached profile of a player.
+     * 
      * @param uuid
      * @param profile
-     * @return
+     * @return The previous profile associated with the key or null.
      */
-    public static PlayerProfile putInCache(String uuid, PlayerProfile profile){
+    public static PlayerProfile putInCache(String uuid, PlayerProfile profile) {
         return cache.put(uuid, profile);
     }
 
     public CompletableFuture<Optional<PlayerProfile>> queryPlayer(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
             var profile = collection.find(Filters.eq("_id", uuid.toString())).first();
+            if (profile != null) {
+                putInCache(uuid.toString(), profile);
+            }
 
             return Optional.ofNullable(profile);
         });
+    }
+
+    public Optional<PlayerProfile> queryAndCachePlayer(UUID uuid) {
+        var profile = collection.find(Filters.eq("_id", uuid.toString())).first();
+        if (profile != null) {
+            putInCache(uuid.toString(), profile);
+        }
+        return Optional.ofNullable(profile);
+
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -178,7 +192,8 @@ public class ProfileManager implements Listener {
 
         /** Broadcast the message to everyone else */
         var reason = ban.getReason().split("-")[0];
-        Bukkit.broadcastMessage(ChatColor.of("#99320F") + e.getProfile().getName() + " has been banned for " + reason + ". " + ban.timeLeft());
+        Bukkit.broadcastMessage(ChatColor.of("#99320F") + e.getProfile().getName() + " has been banned for " + reason
+                + ". " + ban.timeLeft());
 
     }
 
@@ -189,7 +204,7 @@ public class ProfileManager implements Listener {
 
         var reason = mute.getReason().split("-")[0];
         Bukkit.broadcastMessage(
-            ChatColor.of("#99320F") + player + " has been muted for " + reason + ". " + mute.timeLeft());
+                ChatColor.of("#99320F") + player + " has been muted for " + reason + ". " + mute.timeLeft());
 
     }
 
@@ -219,8 +234,7 @@ public class ProfileManager implements Listener {
             e.setCancelled(true);
 
             var reason = mute.getReason().split("-")[0];
-            player.sendMessage(
-                    ChatColor.RED + "You are currently muted for " + reason + " (" + mute.timeLeft() + ")");
+            player.sendMessage(ChatColor.RED + "You are currently muted for " + reason + " (" + mute.timeLeft() + ")");
 
         }
 
