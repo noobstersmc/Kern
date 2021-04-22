@@ -173,7 +173,7 @@ public class ProfileManager implements Listener {
 
         var reason = mute.getReason().split("-")[0];
         Bukkit.broadcastMessage(
-            ChatColor.of("#97559b") + player + " has been muted for " + reason + "" + mute.timeLeft());
+                ChatColor.of("#97559b") + player + " has been muted for " + reason + "" + mute.timeLeft());
 
     }
 
@@ -261,6 +261,20 @@ public class ProfileManager implements Listener {
         }
         return Optional.ofNullable(profile);
 
+    }
+
+    /**
+     * Utility function that inserts and returns a new Document into the database
+     * @param uuid UUID of player
+     * @param name Displayname of player
+     * @return PlayerProfile
+     */
+    public PlayerProfile createProfile(UUID uuid, String name) {
+        var nProfile = PlayerProfile.create(uuid, name, "");
+        putInCache(uuid, nProfile);
+        collection.insertOne(nProfile);
+
+        return nProfile;
     }
 
 }

@@ -115,15 +115,16 @@ public class PunishmentCommand extends BaseCommand {
             if (uid != null) {
                 var profile = instance.getProfileManager().queryAndCachePlayer(uid);
 
-                if(profile.isEmpty()){
-                    
-                }
-
                 if (profile.isPresent()) {
                     var gui = new PunizioneGui(profile.get(), sender, description).getGui();
                     Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
                 } else {
-                    sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before...");
+                    sender.sendMessage(ChatColor.RED + "The profile you requested hasn't joined the server before.\n"
+                            + ChatColor.GREEN + "Creating a new profile...");
+
+                    var nProfile = instance.getProfileManager().createProfile(uid, nameOrId);
+                    var gui = new PunizioneGui(nProfile, sender, description).getGui();
+                    Bukkit.getScheduler().runTask(instance, () -> gui.open(sender));
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + nameOrId + " is not a minecraft user or uuid.");

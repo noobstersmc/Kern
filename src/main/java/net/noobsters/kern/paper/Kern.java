@@ -14,10 +14,6 @@ import net.noobsters.kern.paper.shield.ShieldCMD;
 import net.noobsters.kern.paper.shield.ShieldManager;
 
 public class Kern extends JavaPlugin {
-  // GUI tutorial: https://github.com/MrMicky-FR/FastInv
-  // Scoreboard Tutorial: https://github.com/MrMicky-FR/FastBoard
-  // Commands Tutorial: https://github.com/aikar/commands/wiki/Using-ACF
-
   private @Getter PaperCommandManager commandManager;
   private @Getter ListenerManager listenerManager;
   private @Getter ChatManager chatManager;
