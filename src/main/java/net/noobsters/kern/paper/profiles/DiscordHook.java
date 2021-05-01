@@ -56,7 +56,7 @@ public class DiscordHook {
      * @param message {@link String} containing the message to be sent.
      * @throws JsonProcessingException
      */
-    public static void sendPunizionMessage(String message) throws JsonProcessingException {
+    public static void sendPunizioneMessage(String message) throws JsonProcessingException {
         sendDiscordMessage(DISCORD_HOOK, message);
     }
 

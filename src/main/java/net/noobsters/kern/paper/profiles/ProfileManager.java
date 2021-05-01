@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -158,22 +159,33 @@ public class ProfileManager implements Listener {
             else
                 Bukkit.getScheduler().runTask(Kern.getInstance(), () -> player.kickPlayer(ban.getReason()));
         }
+        /** Define the variables to be used */
+        final var name = e.getProfile().getName();
+        final var punisher = ban.getPunisher();
+        final var reason = ban.getReason().split("-")[0];
+        final var timeleft = ban.timeLeft();
 
-        /** Broadcast the message to everyone else */
-        var reason = ban.getReason().split("-")[0];
-        Bukkit.broadcastMessage(ChatColor.of("#97559b") + e.getProfile().getName() + " has been banned for " + reason
-                + "" + ban.timeLeft());
+        /** Broadcast the message to bukkit and discord */
+        Bukkit.broadcastMessage(ChatColor.of("#97559b") + name + " has been banned for " + reason + "" + timeleft);
+        sendPunizioneMessage(
+                String.format("**%s** has been banned for %s (%s) by **%s**", name, reason, timeleft, punisher));
 
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerMute(PlayerMutedEvent e) {
-        var player = e.getProfile().getName();
-        var mute = e.getMute();
+        /** Define the variables to be used */
+        final var mute = e.getMute();
+        final var name = e.getProfile().getName();
+        final var punisher = mute.getPunisher();
+        final var reason = mute.getReason().split("-")[0];
+        final var timeleft = mute.timeLeft();
 
-        var reason = mute.getReason().split("-")[0];
+        /** Broadcast the message to bukkit and discord */
         Bukkit.broadcastMessage(
-                ChatColor.of("#97559b") + player + " has been muted for " + reason + "" + mute.timeLeft());
+                ChatColor.of("#97559b") + String.format("%s has been muted for %s%s", name, reason, timeleft));
+        sendPunizioneMessage(
+                String.format("**%s** has been muted for %s (%s) by **%s**", name, reason, timeleft, punisher));
 
     }
 
@@ -276,6 +288,20 @@ public class ProfileManager implements Listener {
         collection.insertOne(nProfile);
 
         return nProfile;
+    }
+
+    /**
+     * Private utility function to safely ignore the JsonProcessingException
+     * 
+     * @param message {@link String} to be sent using
+     *                {@link DiscordHook#sendPunizioneMessage(String)}
+     */
+    private void sendPunizioneMessage(String message) {
+        try {
+            DiscordHook.sendPunizioneMessage(message);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
 }

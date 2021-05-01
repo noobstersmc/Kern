@@ -29,7 +29,6 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil;
 @RequiredArgsConstructor
 @CommandAlias("punizione")
 public class PunishmentCommand extends BaseCommand {
-    // TODO: ENSURE ALL PUNISHMENTS ARE ENFORCED WITH LASTEST DATA
     private @NonNull @Getter Kern instance;
 
     @Subcommand("pp add")
@@ -142,7 +141,6 @@ public class PunishmentCommand extends BaseCommand {
             @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
             var uuid = obtainUUID(nameOrId);
-            PlayerProfile profile = null;
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
@@ -173,7 +171,6 @@ public class PunishmentCommand extends BaseCommand {
             @Name("reason") String reason) {
         CompletableFuture.runAsync(() -> {
             var uuid = obtainUUID(nameOrId);
-            PlayerProfile profile = null;
 
             if (uuid != null) {
                 var cachedProfile = ProfileManager.getCache().get(uuid.toString());
@@ -251,7 +248,6 @@ public class PunishmentCommand extends BaseCommand {
                     sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently muted.");
                     return;
                 }
-                // TODO: Pardon the muted player
                 final var prof = profile;
                 profile.pardonPunishment(mute, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
@@ -318,7 +314,6 @@ public class PunishmentCommand extends BaseCommand {
                     sender.sendMessage(ChatColor.RED + profile.getName() + " is not currently banned.");
                     return;
                 }
-                // TODO: Pardon the banned player
                 final var prof = profile;
                 profile.pardonPunishment(ban, instance.getProfileManager().getCollection()).thenAccept((c) -> {
                     if (c) {
