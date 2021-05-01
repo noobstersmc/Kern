@@ -63,6 +63,10 @@ dependencies {//Paper
     compile 'org.mongodb:mongodb-driver-sync:4.2.0'
     //Caffeine
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.1'
+    //Jackson
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+
 
 }
 
@@ -88,8 +92,6 @@ processResources {
 
 shadowJar {
     relocate 'co.aikar.commands', 'shadded.kern.acf'
-    relocate 'org.mongodb', 'shadded.kern.org.mongodb'
-    relocate 'dev.morphia', 'shadded.kern.org.mongodb.morphia'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
     minimize();
 }

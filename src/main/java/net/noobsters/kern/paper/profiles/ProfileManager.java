@@ -265,6 +265,7 @@ public class ProfileManager implements Listener {
 
     /**
      * Utility function that inserts and returns a new Document into the database
+     * 
      * @param uuid UUID of player
      * @param name Displayname of player
      * @return PlayerProfile
