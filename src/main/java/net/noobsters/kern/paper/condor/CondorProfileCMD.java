@@ -1,34 +1,95 @@
 package net.noobsters.kern.paper.condor;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import java.util.concurrent.CompletableFuture;
 
-import org.bson.conversions.Bson;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Name;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
+import net.noobsters.kern.paper.punishments.exceptions.ExceptionHandlers;
+import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
 @CommandPermission("condor.cmd")
 @CommandAlias("tokens")
 public class CondorProfileCMD extends BaseCommand {
     private @Getter CondorManager condorManager;
-    private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public CondorProfileCMD(CondorManager condorManager) {
         this.condorManager = condorManager;
     }
 
+    @CommandCompletion("@players")
+    @Subcommand("info")
+    public void getInfo(CommandSender sender, @Name("token") String tokenIdName) {
+        CompletableFuture.runAsync(() -> {
+            var profile = getProfile(tokenIdName);
+            if (profile != null) {
+                sender.sendMessage(profile.stringifiedSummary());
+            } else {
+                sender.sendMessage(ChatColor.RED + "A profile couldn't be found with the token " + tokenIdName);
+            }
+
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
+
+    }
+
+    private CondorProfile getProfile(String tokenIdName) {
+        /** Try to query token from mongo */
+        var collection = getCollection();
+        var prof = collection.find(Filters.or(Filters.eq("token", tokenIdName), Filters.eq("name", tokenIdName)))
+                .first();
+        /** Return profile if one was found */
+        if (prof != null) {
+            return prof;
+        }
+        /** Check if bukkit has a local cached version of the given string */
+        var cached = Bukkit.getOfflinePlayerIfCached(tokenIdName);
+        if (cached != null) {
+            var query = collection.find(Filters.eq("token", cached.getUniqueId().toString())).first();
+            if (query != null) {
+                return query;
+            }
+        }
+        /** Query info of whatever the string is */
+        var playerInfoQuery = PlayerDBUtil.getPlayerObject(tokenIdName);
+        /** If PlayerDB query returns an object, the player is valid */
+        if (playerInfoQuery != null) {
+            var id = playerInfoQuery.get("id");
+            /** Ensure the ID is not null */
+            if (id != null) {
+                var query = collection.find(Filters.eq("token", id.getAsString())).first();
+                /** If the response if not null, the player already has a condor profile */
+                if (query != null) {
+                    return query;
+                }
+
+            }
+        }
+
+        /** If code ever reacher down here, return null */
+        return null;
+    }
+
+    /**
+     * Util function to quickly acces condor collection.
+     * 
+     * @return Same as {@link CondorManager#getCondorCollection()}
+     */
+    private MongoCollection<CondorProfile> getCollection() {
+        return condorManager.getCondorCollection();
+    }
+
+/* 
     @CommandCompletion("Integer")
     @Subcommand("get-all")
     public void getAll(CommandSender sender, @Name("page") @Default("0") Integer page) {
@@ -92,23 +153,23 @@ public class CondorProfileCMD extends BaseCommand {
 
     private Bson obtainFieldUpdate(String fieldName, String newValue) {
         switch (fieldName.toLowerCase()) {
-        case "name": {
-            return Updates.set("name", newValue);
-        }
-        case "token": {
-            return Updates.set("token", newValue);
-        }
-        case "credits": {
-            return Updates.set("credits", Double.parseDouble(newValue));
-        }
-        case "limit": {
-            return Updates.set("instance_limit", Integer.parseInt(newValue));
-        }
-        case "super": {
-            return Updates.set("super_token", Boolean.parseBoolean(newValue));
-        }
+            case "name": {
+                return Updates.set("name", newValue);
+            }
+            case "token": {
+                return Updates.set("token", newValue);
+            }
+            case "credits": {
+                return Updates.set("credits", Double.parseDouble(newValue));
+            }
+            case "limit": {
+                return Updates.set("instance_limit", Integer.parseInt(newValue));
+            }
+            case "super": {
+                return Updates.set("super_token", Boolean.parseBoolean(newValue));
+            }
         }
         return null;
     }
-
+ */
 }

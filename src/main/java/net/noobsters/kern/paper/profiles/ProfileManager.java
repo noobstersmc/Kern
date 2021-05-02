@@ -166,7 +166,7 @@ public class ProfileManager implements Listener {
         final var timeleft = ban.timeLeft();
 
         /** Broadcast the message to bukkit and discord */
-        Bukkit.broadcastMessage(ChatColor.of("#97559b") + name + " has been banned for " + reason + "" + timeleft);
+        Bukkit.broadcastMessage(ChatColor.of("#97559b") + name + " has been banned for " + reason + " " + timeleft);
         sendPunizioneMessage(
                 String.format("**%s** has been banned for %s (%s) by **%s**", name, reason, timeleft, punisher));
 
@@ -183,7 +183,7 @@ public class ProfileManager implements Listener {
 
         /** Broadcast the message to bukkit and discord */
         Bukkit.broadcastMessage(
-                ChatColor.of("#97559b") + String.format("%s has been muted for %s%s", name, reason, timeleft));
+                ChatColor.of("#97559b") + String.format("%s has been muted for %s %s", name, reason, timeleft));
         sendPunizioneMessage(
                 String.format("**%s** has been muted for %s (%s) by **%s**", name, reason, timeleft, punisher));
 

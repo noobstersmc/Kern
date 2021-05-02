@@ -19,7 +19,7 @@ public class CondorManager {
     public CondorManager(Kern instance) {
         this.instance = instance;
         this.mongoDatabase = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor");
-        this.condorCollection = mongoDatabase.getCollection("mongoAuth", CondorProfile.class)
+        this.condorCollection = mongoDatabase.getCollection("auth", CondorProfile.class)
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
 

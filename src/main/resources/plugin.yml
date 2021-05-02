@@ -3,3 +3,5 @@ version: ${version}
 main: net.noobsters.kern.paper.Kern
 api-version: 1.16
 api: ["1.16"]
+depends:
+  - "Vault"
