@@ -50,9 +50,12 @@ public class CondorProfile {
      * @param superToken    {@link Boolean} weather this token is admin or not.
      * @return A new instance of a {@link CondorProfile}
      */
-    public static CondorProfile create(String token, String name, Double credits, Integer instanceLimit,
-            Boolean superToken) {
+    public static CondorProfile create(String token, String name, int credits, int instanceLimit, Boolean superToken) {
         return new CondorProfile(token, name, credits, instanceLimit, superToken);
+    }
+
+    public static CondorProfile createDefaults(String token, String name) {
+        return new CondorProfile(token, name, 0, 1, false);
     }
 
     /**
@@ -62,8 +65,10 @@ public class CondorProfile {
      * @return Stringified {@link CondorProfile}
      */
     public String stringifiedSummary() {
-        return String.format("%7$s\n%5$sToken:%6$s %s\n%5$sDisplayname:%6$s %s\n%5$sCredits:%6$s %d\n%5$sInstance Limit:%6$s %d\n%7$s", token, name,
-                (int) ((double) credits), instanceLimit, ChatColor.GREEN.toString(), ChatColor.WHITE.toString(), "========================");
+        return String.format(
+                "%7$s\n%5$sToken:%6$s %s\n%5$sDisplayname:%6$s %s\n%5$sCredits:%6$s %d\n%5$sInstance Limit:%6$s %d\n%7$s",
+                token, name, (int) ((double) credits), instanceLimit, ChatColor.GREEN.toString(),
+                ChatColor.WHITE.toString(), "========================");
     }
 
     /**

@@ -1,11 +1,17 @@
 package net.noobsters.kern.paper.condor;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
+import com.google.gson.JsonObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import co.aikar.commands.BaseCommand;
@@ -32,7 +38,7 @@ public class CondorProfileCMD extends BaseCommand {
     @Subcommand("info")
     public void getInfo(CommandSender sender, @Name("token") String tokenIdName) {
         CompletableFuture.runAsync(() -> {
-            var profile = getProfile(tokenIdName);
+            var profile = getProfile(tokenIdName, null, null);
             if (profile != null) {
                 sender.sendMessage(profile.stringifiedSummary());
             } else {
@@ -40,10 +46,168 @@ public class CondorProfileCMD extends BaseCommand {
             }
 
         }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
+    }
+
+    /*
+     * TODO: Known bug, the command returns the old state of the profile but it does
+     * increment the credits.
+     */
+    @CommandCompletion("@players <credits>")
+    @Subcommand("set credits")
+    public void setCondorProfile(CommandSender sender, @Name("token") String tokenIdName,
+            @Name("credits") Integer credits) {
+        CompletableFuture.runAsync(() -> {
+            var profile = getOrCreateProfile(sender, tokenIdName);
+            if (profile != null) {
+                var updatedProfile = getCollection().findOneAndUpdate(Filters.eq("token", profile.getToken()),
+                        Updates.set("credits", credits),
+                        new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+                if (updatedProfile != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Profile for " + tokenIdName + " was found and updated to:"
+                            + ChatColor.RESET + "\n" + profile.stringifiedSummary());
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No condor profile could be updated for " + tokenIdName);
+
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + "No condor profile could be found or created for " + tokenIdName);
+            }
+
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
 
     }
 
-    private CondorProfile getProfile(String tokenIdName) {
+    @CommandCompletion("@players <credits>")
+    @Subcommand("add credits")
+    public void addCredits(CommandSender sender, @Name("token") String tokenIdName, @Name("credits") Integer credits) {
+        CompletableFuture.runAsync(() -> {
+            var profile = getOrCreateProfile(sender, tokenIdName);
+            if (profile != null) {
+                var updatedProfile = getCollection().findOneAndUpdate(Filters.eq("token", profile.getToken()),
+                        Updates.inc("credits", credits),
+                        new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+                if (updatedProfile != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Profile for " + tokenIdName
+                            + " was found and its credits were incremented by " + credits + " to:" + ChatColor.RESET
+                            + "\n" + profile.stringifiedSummary());
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No condor profile could be updated for " + tokenIdName);
+
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + "No condor profile could be found or created for " + tokenIdName);
+            }
+
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
+    }
+
+    @CommandCompletion("@players <credits>")
+    @Subcommand("remove credits")
+    public void removeCredits(CommandSender sender, @Name("token") String tokenIdName,
+            @Name("credits") Integer credits) {
+        CompletableFuture.runAsync(() -> {
+            var profile = getOrCreateProfile(sender, tokenIdName);
+            if (profile != null) {
+                var updatedProfile = getCollection().findOneAndUpdate(Filters.eq("token", profile.getToken()),
+                        Updates.inc("credits", (-credits)),
+                        new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+                if (updatedProfile != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Profile for " + tokenIdName
+                            + " was found and its credits were decreased by " + (-credits) + " to:" + ChatColor.RESET
+                            + "\n" + profile.stringifiedSummary());
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No condor profile could be updated for " + tokenIdName);
+
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + "No condor profile could be found or created for " + tokenIdName);
+            }
+
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
+    }
+
+    @CommandCompletion("@players <instance_limit>")
+    @Subcommand("set instance-limit")
+    public void setInstanceLimit(CommandSender sender, @Name("token") String tokenIdName,
+            @Name("instance_limit") Integer instanceLimit) {
+        CompletableFuture.runAsync(() -> {
+            var profile = getProfile(tokenIdName, null, null);
+            if (profile != null) {
+                var updatedProfile = getCollection().findOneAndUpdate(Filters.eq("token", profile.getToken()),
+                        Updates.set("instance_limit", instanceLimit),
+                        new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+                if (updatedProfile != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Profile for " + tokenIdName + " was found and updated to:"
+                            + ChatColor.RESET + "\n" + profile.stringifiedSummary());
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No condor profile could be updated for " + tokenIdName);
+
+                }
+
+            } else {
+                sender.sendMessage(ChatColor.RED + "No condor profile could be found or created for " + tokenIdName);
+            }
+
+        }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
+
+    }
+
+    /**
+     * Utility function that looks for a condor profile or creates it if one is not
+     * found.
+     * 
+     * @param tokenIdName Token, UUID, or Name of the player.
+     * @return Either a found or created {@link CondorProfile}.
+     */
+    private CondorProfile getOrCreateProfile(CommandSender sender, String tokenIdName) {
+        final var collection = getCollection();
+        return getProfile(tokenIdName, (ofp) -> {
+            /** Define variables */
+            var id = ofp.getUniqueId().toString();
+            var username = ofp.getName();
+            /** Create local profile */
+            var newProfile = CondorProfile.createDefaults(id, username);
+            /** Insert onto database */
+            collection.insertOne(newProfile);
+            /** Log back to sender and return new object */
+            sender.sendMessage(ChatColor.YELLOW
+                    + String.format("A new profile has been created for %s (%s) during the ofp stage.", username, id));
+            return newProfile;
+        }, (json) -> {
+            /** Define variables */
+            var id = json.get("id").getAsString();
+            var username = json.get("username").getAsString();
+            /** Create local profile */
+            var newProfile = CondorProfile.createDefaults(id, username);
+            /** Insert onto database */
+            collection.insertOne(newProfile);
+            /** Log back to sender and return new object */
+            sender.sendMessage(ChatColor.YELLOW
+                    + String.format("A new profile has been created for %s (%s) during the json stage.", username, id));
+            return newProfile;
+        });
+    }
+
+    /**
+     * Utility function to obtain the profile for an specified token or player, if
+     * present
+     * 
+     * @param tokenIdName     Token, UUID, or Name of the player.
+     * @param offlineFunction Function<{@link OfflinePlayer}, {@link CondorProfile}>
+     *                        that runs if not null when the offlinePlayer query
+     *                        doesn't return a profile.
+     * @param jsonFunction    Function<{@link JsonObject}, {@link CondorProfile}>
+     *                        that runs if not null when the
+     *                        {@link PlayerDBUtil#getPlayerObject(String)} query
+     *                        doesn't return a profile.
+     * @return {@link CondorProfile} or null if not found, or not created by any of
+     *         the provided functions.
+     */
+    private CondorProfile getProfile(String tokenIdName, Function<OfflinePlayer, CondorProfile> offlineFunction,
+            Function<JsonObject, CondorProfile> jsonFunction) {
         /** Try to query token from mongo */
         var collection = getCollection();
         var prof = collection.find(Filters.or(Filters.eq("token", tokenIdName), Filters.eq("name", tokenIdName)))
@@ -59,6 +223,17 @@ public class CondorProfileCMD extends BaseCommand {
             if (query != null) {
                 return query;
             }
+            /**
+             * If the query didn't find a profile, allow the function, if present, to
+             * execute arbitrary instructions
+             */
+            if (offlineFunction != null) {
+                var maybeNewProfile = offlineFunction.apply(cached);
+                if (maybeNewProfile != null) {
+                    return maybeNewProfile;
+                }
+            }
+
         }
         /** Query info of whatever the string is */
         var playerInfoQuery = PlayerDBUtil.getPlayerObject(tokenIdName);
@@ -71,6 +246,16 @@ public class CondorProfileCMD extends BaseCommand {
                 /** If the response if not null, the player already has a condor profile */
                 if (query != null) {
                     return query;
+                }
+                /**
+                 * If the query didn't find a profile, allow the function, if present, to
+                 * execute arbitrary instructions
+                 */
+                if (jsonFunction != null) {
+                    var maybeNewProfile = jsonFunction.apply(playerInfoQuery);
+                    if (maybeNewProfile != null) {
+                        return maybeNewProfile;
+                    }
                 }
 
             }
@@ -88,88 +273,4 @@ public class CondorProfileCMD extends BaseCommand {
     private MongoCollection<CondorProfile> getCollection() {
         return condorManager.getCondorCollection();
     }
-
-/* 
-    @CommandCompletion("Integer")
-    @Subcommand("get-all")
-    public void getAll(CommandSender sender, @Name("page") @Default("0") Integer page) {
-        var offset = page;
-        var query = condorManager.getCondorCollection().find().limit(5).skip((offset));
-        var iter = query.iterator();
-        var count = 0;
-        while (iter.hasNext()) {
-            count++;
-            var nextElement = iter.next();
-            sender.sendMessage(
-                    ChatColor.GOLD + "" + (count + offset) + ". " + ChatColor.WHITE + gson.toJson(nextElement));
-        }
-
-    }
-
-    @CommandCompletion("<token>")
-    @Subcommand("get token")
-    public void getProfileFromToken(CommandSender sender, @Name("userToken") String token) {
-        var condorProfile = condorManager.getCondorCollection().find(Filters.eq("token", token)).first();
-        if (condorProfile != null) {
-            sender.sendMessage("Query found:\n" + gson.toJson(condorProfile));
-
-        } else {
-            sender.sendMessage("Couldn't find a profile for your given token.");
-        }
-
-    }
-
-    @CommandCompletion("<token>")
-    @Subcommand("get active")
-    public void getInstances(CommandSender sender, @Name("userToken") String token) {
-
-    }
-
-    @CommandCompletion("token @condor_fields")
-    @Subcommand("edit-token")
-    public void editProfileToken(CommandSender sender, @Default("own") @Name("userToken") String token,
-            @Name("field-to-edit") String fieldName, @Name("new-field-value") String value) {
-        if (token.equalsIgnoreCase("own") && sender instanceof Player) {
-            token = ((Player) sender).getUniqueId().toString();
-        }
-
-        var collection = condorManager.getCondorCollection();
-
-        var update = obtainFieldUpdate(fieldName, value);
-        if (update != null) {
-            var profile = collection.findOneAndUpdate(Filters.eq("token", token), update);
-            if (profile != null) {
-                sender.sendMessage(ChatColor.GREEN + "Profile " + profile.getName() + " has been updated:\n"
-                        + ChatColor.GRAY + gson.toJson(profile) + ChatColor.GREEN + "\nUpdate: \n" + ChatColor.GRAY
-                        + update.toString());
-
-            }
-        } else {
-            sender.sendMessage(ChatColor.RED + "The field you wish to update is not known.\nTry again with:"
-                    + ChatColor.YELLOW + " name, token, credits, limit, or super!");
-        }
-
-    }
-
-    private Bson obtainFieldUpdate(String fieldName, String newValue) {
-        switch (fieldName.toLowerCase()) {
-            case "name": {
-                return Updates.set("name", newValue);
-            }
-            case "token": {
-                return Updates.set("token", newValue);
-            }
-            case "credits": {
-                return Updates.set("credits", Double.parseDouble(newValue));
-            }
-            case "limit": {
-                return Updates.set("instance_limit", Integer.parseInt(newValue));
-            }
-            case "super": {
-                return Updates.set("super_token", Boolean.parseBoolean(newValue));
-            }
-        }
-        return null;
-    }
- */
 }
