@@ -1,12 +1,16 @@
 package net.noobsters.kern.paper.shield.jcedeno;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
+import org.bukkit.inventory.ItemStack;
 
 public class CustomShield {
     @BsonId
@@ -18,6 +22,14 @@ public class CustomShield {
     @BsonProperty("custom_model_data")
     private Integer customModelData;
 
+    /**
+     * Normal constructor for the Custom Shield object
+     * 
+     * @param name
+     * @param patterns
+     * @param bannerDyeColor
+     * @param customModelData
+     */
     public CustomShield(String name, List<CustomPattern> patterns, DyeColor bannerDyeColor, Integer customModelData) {
         this.name = name;
         this.patterns = patterns;
@@ -39,6 +51,24 @@ public class CustomShield {
         return new CustomShield(name, patterns.stream().map(e -> new CustomPattern(e)).collect(Collectors.toList()),
                 bannerDyeColor, customModelData);
     }
+
+    public ItemStack applyCustomBannerData(ItemStack orginalItem) {
+        assertFalse("The provided item can only be a shield", (orginalItem.getType() != Material.SHIELD));
+        // TODO: Implement method to quickly transform a shield into a custom shield
+        return null;
+    }
+
+    /**
+     * Empty constructor for pojocs.
+     */
+    public CustomShield() {
+
+    }
+
+    /**
+     * From here on, there's just a lot of boiler-plate getters and setters for
+     * pojocs to work. It can, for the most part, be ignored.
+     */
 
     public String getName() {
         return name;
