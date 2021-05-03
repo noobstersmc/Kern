@@ -29,6 +29,10 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil;
 @CommandAlias("tokens")
 public class CondorProfileCMD extends BaseCommand {
     private @Getter CondorManager condorManager;
+    /*
+     * TODO: Known bug, the command returns the old state of the profile but it does
+     * increment the credits.
+     */
 
     public CondorProfileCMD(CondorManager condorManager) {
         this.condorManager = condorManager;
@@ -48,10 +52,6 @@ public class CondorProfileCMD extends BaseCommand {
         }).handle((result, ex) -> ExceptionHandlers.handleVoidWithSender(result, ex, sender));
     }
 
-    /*
-     * TODO: Known bug, the command returns the old state of the profile but it does
-     * increment the credits.
-     */
     @CommandCompletion("@players <credits>")
     @Subcommand("set credits")
     public void setCondorProfile(CommandSender sender, @Name("token") String tokenIdName,
@@ -156,42 +156,6 @@ public class CondorProfileCMD extends BaseCommand {
     }
 
     /**
-     * Utility function that looks for a condor profile or creates it if one is not
-     * found.
-     * 
-     * @param tokenIdName Token, UUID, or Name of the player.
-     * @return Either a found or created {@link CondorProfile}.
-     */
-    private CondorProfile getOrCreateProfile(CommandSender sender, String tokenIdName) {
-        final var collection = getCollection();
-        return getProfile(tokenIdName, (ofp) -> {
-            /** Define variables */
-            var id = ofp.getUniqueId().toString();
-            var username = ofp.getName();
-            /** Create local profile */
-            var newProfile = CondorProfile.createDefaults(id, username);
-            /** Insert onto database */
-            collection.insertOne(newProfile);
-            /** Log back to sender and return new object */
-            sender.sendMessage(ChatColor.YELLOW
-                    + String.format("A new profile has been created for %s (%s) during the ofp stage.", username, id));
-            return newProfile;
-        }, (json) -> {
-            /** Define variables */
-            var id = json.get("id").getAsString();
-            var username = json.get("username").getAsString();
-            /** Create local profile */
-            var newProfile = CondorProfile.createDefaults(id, username);
-            /** Insert onto database */
-            collection.insertOne(newProfile);
-            /** Log back to sender and return new object */
-            sender.sendMessage(ChatColor.YELLOW
-                    + String.format("A new profile has been created for %s (%s) during the json stage.", username, id));
-            return newProfile;
-        });
-    }
-
-    /**
      * Utility function to obtain the profile for an specified token or player, if
      * present
      * 
@@ -263,6 +227,42 @@ public class CondorProfileCMD extends BaseCommand {
 
         /** If code ever reacher down here, return null */
         return null;
+    }
+
+    /**
+     * Utility function that looks for a condor profile or creates it if one is not
+     * found.
+     * 
+     * @param tokenIdName Token, UUID, or Name of the player.
+     * @return Either a found or created {@link CondorProfile}.
+     */
+    private CondorProfile getOrCreateProfile(CommandSender sender, String tokenIdName) {
+        final var collection = getCollection();
+        return getProfile(tokenIdName, (ofp) -> {
+            /** Define variables */
+            var id = ofp.getUniqueId().toString();
+            var username = ofp.getName();
+            /** Create local profile */
+            var newProfile = CondorProfile.createDefaults(id, username);
+            /** Insert onto database */
+            collection.insertOne(newProfile);
+            /** Log back to sender and return new object */
+            sender.sendMessage(ChatColor.YELLOW
+                    + String.format("A new profile has been created for %s (%s) during the ofp stage.", username, id));
+            return newProfile;
+        }, (json) -> {
+            /** Define variables */
+            var id = json.get("id").getAsString();
+            var username = json.get("username").getAsString();
+            /** Create local profile */
+            var newProfile = CondorProfile.createDefaults(id, username);
+            /** Insert onto database */
+            collection.insertOne(newProfile);
+            /** Log back to sender and return new object */
+            sender.sendMessage(ChatColor.YELLOW
+                    + String.format("A new profile has been created for %s (%s) during the json stage.", username, id));
+            return newProfile;
+        });
     }
 
     /**
