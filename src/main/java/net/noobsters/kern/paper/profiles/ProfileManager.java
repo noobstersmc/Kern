@@ -53,9 +53,9 @@ public class ProfileManager implements Listener {
 
         this.mongoHynix = MongoHynix.createFromJson(dbConfig);
         try {
-            this.database = mongoHynix.getMongoClient().getDatabase("condor")
-                    .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                            CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
+            this.database = mongoHynix.getMongoClient().getDatabase("condor").withCodecRegistry(CodecRegistries
+                    .fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(
+                            PojoCodecProvider.builder().automatic(true).build())));
 
             this.collection = database.getCollection("punishments", PlayerProfile.class);
             // If everything is okay, register the listener.

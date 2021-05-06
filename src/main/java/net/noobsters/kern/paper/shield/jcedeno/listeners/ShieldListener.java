@@ -1,9 +1,5 @@
 package net.noobsters.kern.paper.shield.jcedeno.listeners;
 
-import java.util.concurrent.CompletableFuture;
-
-import com.mongodb.client.model.Filters;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,15 +34,20 @@ public class ShieldListener implements Listener {
 
         if (result != null && result.getType() == Material.SHIELD) {
             var uuid = e.getView().getPlayer().getUniqueId().toString();
-            var currentShieldName = ProfileManager.getCache().get(uuid).getActiveShield();
-            CompletableFuture.runAsync(() -> {
-                var shield = shieldManager.getShieldCollection().find(Filters.eq(currentShieldName)).first();
-                if (shield != null) {
-                    e.getInventory().setResult(shield.applyCustomBannerData(result));
-                    e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());
+            var shieldName = ProfileManager.getCache().get(uuid).getActiveShield();
+            var shield = shieldManager.getShieldFromCache(shieldName);
 
-                }
-            });
+            if (shield != null) {
+                e.getInventory().setResult(shield.applyCustomBannerData(result));
+                e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());
+            } else {
+                System.out.println("Shield not present");
+                Bukkit.getScheduler().runTaskLaterAsynchronously(shieldManager.getInstance(), ()->{
+                    var shieldAgain = shieldManager.getShieldFromCache(shieldName);
+                    e.getInventory().setResult(shieldAgain.applyCustomBannerData(result));
+                    e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());
+                }, 20L);
+            }
 
         }
     }

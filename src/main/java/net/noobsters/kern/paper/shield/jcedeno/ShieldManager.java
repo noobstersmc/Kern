@@ -2,6 +2,7 @@ package net.noobsters.kern.paper.shield.jcedeno;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
@@ -33,6 +34,7 @@ public class ShieldManager {
     private @Getter MongoCollection<ShieldProfile> shieldProfileCollection;
     /** Initialize the cache */
     private static @Getter Map<String, CustomShield> shieldLocalCache = new HashMap<>();
+    private static @Getter Map<String, ShieldProfile> shieldProfileCache = new HashMap<>();
 
     public ShieldManager(final Kern instance) {
         this.instance = instance;
@@ -47,10 +49,13 @@ public class ShieldManager {
         this.mongoDatabase = mongoHynix.getMongoClient().getDatabase("jcedeno")
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
-        /** Obtain the punishments collection as a collection of PlayerStats */
+        /** Obtain the shield collection as a colelction of CustomShields. */
         this.shieldCollection = mongoDatabase.getCollection("shield", CustomShield.class);
-        this.shieldProfileCollection = instance.getCondorManager().getMongoDatabase().getCollection("punishments",
-                ShieldProfile.class);
+        /** Obtain the punishments collection as a collection of ShieldProfiles */
+        this.shieldProfileCollection = instance.getCondorManager().getMongoDatabase()
+                .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())))
+                .getCollection("punishments", ShieldProfile.class);
     }
 
     /**
@@ -60,7 +65,8 @@ public class ShieldManager {
      * @return {@link ShieldProfile} if it exists, null if it doesn't.
      */
     public ShieldProfile getShieldProfile(String id) {
-        return shieldProfileCollection.find(Filters.eq(id)).first();
+        var prof = shieldProfileCollection.find(Filters.eq("_id", id)).first();
+        return prof;
     }
 
     /**
@@ -78,12 +84,43 @@ public class ShieldManager {
         var shield = shieldCollection.find(Filters.eq(shield_id)).first();
         /** If null, throw exception */
         if (shield == null)
-            throw new ShieldNotFoundException("Shield " + shield_id + " could not bee found on the collection "
-                    + shieldCollection.getNamespace());
+            throw new ShieldNotFoundException(
+                    "Shield " + shield_id + " could not be found on the collection " + shieldCollection.getNamespace());
         /** Otherwise, update the player's profile and return it */
         return shieldProfileCollection.findOneAndUpdate(Filters.eq(id), Updates.set("shield", shield.getName()),
                 new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
 
+    }
+
+    /**
+     * Utility function that pulls a shield from the database and puts it in cache.
+     * 
+     * @param id Player UUID to be updated.
+     * @return {@link CustomShield} object or null if not existant.
+     */
+    public CustomShield getShield(String id) {
+        /** Query shield */
+        var shield = shieldCollection.find(Filters.eq(id)).first();
+        /** Put in local cache */
+        shieldLocalCache.put(id, shield);
+        return shield;
+    }
+
+    /**
+     * Helper function that pulls the shield from local cache and requeries for new
+     * data.
+     * 
+     * @param id Player UUID to be updated.
+     * @return {@link CustomShield} object or null if not existant.
+     */
+    public CustomShield getShieldFromCache(String id) {
+        var cached = shieldLocalCache.get(id);
+        /** If null ask the database to query it */
+        if (cached == null) {
+            CompletableFuture.runAsync(() -> getShield(id));
+        }
+
+        return cached;
     }
 
 }

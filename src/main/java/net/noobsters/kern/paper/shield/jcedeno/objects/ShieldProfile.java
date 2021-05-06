@@ -2,17 +2,17 @@ package net.noobsters.kern.paper.shield.jcedeno.objects;
 
 import org.bson.codecs.pojo.annotations.BsonId;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Utility Object to manage a player's shield.
  */
-public @Data class ShieldProfile {
+public class ShieldProfile {
     @BsonId
-    private String uuid;
-    private String shield;
+    private @Getter @Setter String uuid;
+    private @Getter @Setter String shield;
 
     public ShieldProfile() {
-
     }
 }
