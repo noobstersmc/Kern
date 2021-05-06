@@ -52,6 +52,15 @@ public class CustomShield {
                 bannerDyeColor, customModelData);
     }
 
+    /**
+     * Helper function to quickly add the custom shield data to an ItemStack of type
+     * {@link Material#SHIELD}
+     * 
+     * @param orginalItem An item stack of type SHIELD.
+     * @return {@link ItemStack} aggregating the provided shield item with this
+     *         CustomShield banner data.
+     */
+    @Deprecated
     public ItemStack applyCustomBannerData(ItemStack orginalItem) {
         assertFalse("The provided item can only be a shield", (orginalItem.getType() != Material.SHIELD));
         // TODO: Implement method to quickly transform a shield into a custom shield
@@ -100,6 +109,16 @@ public class CustomShield {
 
     public void setCustomModelData(Integer customModelData) {
         this.customModelData = customModelData;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("CustomShield(name=%s, patterns=%s, color=%s, data=%s)", objectOrNull(this.name),
+                objectOrNull(this.patterns), objectOrNull(this.bannerDyeColor), objectOrNull(this.customModelData));
+    }
+
+    private String objectOrNull(Object o) {
+        return o != null ? o.toString() : "null";
     }
 
 }
