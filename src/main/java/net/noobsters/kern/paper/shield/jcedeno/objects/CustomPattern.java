@@ -1,4 +1,4 @@
-package net.noobsters.kern.paper.shield.jcedeno;
+package net.noobsters.kern.paper.shield.jcedeno.objects;
 
 import org.bukkit.DyeColor;
 import org.bukkit.block.banner.Pattern;

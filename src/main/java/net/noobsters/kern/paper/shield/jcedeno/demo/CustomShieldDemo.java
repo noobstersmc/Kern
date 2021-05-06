@@ -1,4 +1,4 @@
-package net.noobsters.kern.paper.shield.jcedeno;
+package net.noobsters.kern.paper.shield.jcedeno.demo;
 
 import java.util.List;
 import java.util.Random;
@@ -17,6 +17,7 @@ import org.bukkit.block.banner.PatternType;
 
 import net.noobsters.kern.paper.configs.DatabasesConfig;
 import net.noobsters.kern.paper.databases.impl.MongoHynix;
+import net.noobsters.kern.paper.shield.jcedeno.objects.CustomShield;
 
 public class CustomShieldDemo {
 
