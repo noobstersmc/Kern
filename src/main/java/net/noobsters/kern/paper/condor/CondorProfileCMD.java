@@ -29,10 +29,6 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil;
 @CommandAlias("tokens")
 public class CondorProfileCMD extends BaseCommand {
     private @Getter CondorManager condorManager;
-    /*
-     * TODO: Known bug, the command returns the old state of the profile but it does
-     * increment the credits.
-     */
 
     public CondorProfileCMD(CondorManager condorManager) {
         this.condorManager = condorManager;
