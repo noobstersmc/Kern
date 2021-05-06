@@ -1,9 +1,18 @@
 package net.noobsters.kern.paper.shield.jcedeno.listeners;
 
+import java.util.concurrent.CompletableFuture;
+
+import com.mongodb.client.model.Filters;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 
 import lombok.Getter;
+import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.shield.jcedeno.ShieldManager;
 
 public class ShieldListener implements Listener {
@@ -20,4 +29,25 @@ public class ShieldListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, shieldManager.getInstance());
     }
 
+    @EventHandler
+    public void onCraft(final PrepareItemCraftEvent e) {
+        var recipe = e.getRecipe();
+        if (recipe == null)
+            return;
+        var result = recipe.getResult();
+
+        if (result != null && result.getType() == Material.SHIELD) {
+            var uuid = e.getView().getPlayer().getUniqueId().toString();
+            var currentShieldName = ProfileManager.getCache().get(uuid).getActiveShield();
+            CompletableFuture.runAsync(() -> {
+                var shield = shieldManager.getShieldCollection().find(Filters.eq(currentShieldName)).first();
+                if (shield != null) {
+                    e.getInventory().setResult(shield.applyCustomBannerData(result));
+                    e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());
+
+                }
+            });
+
+        }
+    }
 }

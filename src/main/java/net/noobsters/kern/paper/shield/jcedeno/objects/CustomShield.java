@@ -105,11 +105,23 @@ public @Data class CustomShield {
      * @return {@link ItemStack} aggregating the provided shield item with this
      *         CustomShield banner data.
      */
-    @Deprecated
-    public ItemStack applyCustomBannerData(ItemStack orginalItem) {
+    public ItemStack applyCustomBannerData(final ItemStack orginalItem) {
         assertFalse("The provided item can only be a shield", (orginalItem.getType() != Material.SHIELD));
-        // TODO: Implement method to quickly transform a shield into a custom shield
-        return null;
+        System.out.println("Applying custom shield data");
+
+        var meta = orginalItem.getItemMeta();
+        var bmeta = (BlockStateMeta) meta;
+        var banner = (Banner) bmeta.getBlockState();
+
+        banner.setPatterns(
+                (this.patterns.stream().map(patterns -> patterns.toBukkitPattern())).collect(Collectors.toList()));
+        banner.setBaseColor(this.bannerDyeColor);
+
+        banner.update();
+        bmeta.setBlockState(banner);
+        orginalItem.setItemMeta(bmeta);
+
+        return orginalItem;
     }
 
     /**
