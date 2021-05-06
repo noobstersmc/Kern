@@ -20,10 +20,17 @@ import net.noobsters.kern.paper.databases.impl.MongoHynix;
 import net.noobsters.kern.paper.shield.jcedeno.objects.CustomShield;
 
 public class CustomShieldDemo {
-
+    /** Separator constant */
+    private static final String separator = "==============";
     /** Useful random constant */
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
+    /**
+     * Demo function. This code will execute all the instructions at once. It's
+     * recommended to use break points and running it in debug.
+     * 
+     * @param args String arguments (Default).
+     */
     public static void main(String[] args) {
         /** Obtain mongo hynix object of database.json file */
         MongoHynix mongoHynix = MongoHynix.createFromJson(DatabasesConfig.of("databases"));
@@ -47,13 +54,13 @@ public class CustomShieldDemo {
         var shieldFound = queryShield(shields, randomId);
         /** Print out the message */
         System.out.println(String.format("%3$s\nQuery for %s returned: %s\n%3$s", randomId,
-                (shieldFound != null ? shieldFound : "null"), "=============="));
+                (shieldFound != null ? shieldFound : "null"), separator));
 
         /** Delete a shield */
         var deleteResult = deleteShield(shields, randomId);
         /** Print out the message */
         System.out.println(String.format("%3$s\nDelete query %s returned: %s\n%3$s", randomId,
-                (deleteResult != null ? deleteResult : "null"), "=============="));
+                (deleteResult != null ? deleteResult : "null"), separator));
 
     }
 
@@ -69,7 +76,7 @@ public class CustomShieldDemo {
         /** Insert onto database */
         var result = collection.insertOne(shield);
         /** Print out the reuslt of the insertion */
-        System.out.println("==============\nInserted " + shield + " and result was:\n" + result + "\n==============");
+        System.out.println(separator + "\nInserted " + shield + " and result was:\n" + result + "\n" + separator);
     }
 
     /**
@@ -104,12 +111,12 @@ public class CustomShieldDemo {
         var iter = collection.find().iterator();
         var count = 0;
 
-        String message = "==============";
+        String message = separator;
         while (iter.hasNext()) {
             count++;
             message += ("\n" + count + ". " + iter.next());
         }
-        message += ("\n==============");
+        message += ("\n" + separator);
 
         System.out.println(message);
     }
