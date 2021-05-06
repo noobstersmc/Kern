@@ -27,4 +27,6 @@ public class CustomShield {
 
     }
 
+    //TODO: Ensure the data type can be fully serialized and deserialized in mongo using pojocs.
+
 }
