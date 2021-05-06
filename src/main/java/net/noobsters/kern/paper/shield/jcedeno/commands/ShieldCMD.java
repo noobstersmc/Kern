@@ -1,5 +1,7 @@
 package net.noobsters.kern.paper.shield.jcedeno.commands;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.mongodb.MongoWriteException;
 
 import org.bukkit.entity.Player;
@@ -35,21 +37,24 @@ public class ShieldCMD extends BaseCommand {
     @CommandAlias("create")
     @CommandCompletion("<name>")
     public void createShield(Player sender, String shieldName) {
-        var banner = sender.getInventory().getItemInMainHand().clone();
-        try {
-            var customShield = CustomShield.fromStack(shieldName, banner);
-            var insertResult = shieldManager.getShieldCollection().insertOne(customShield);
+        CompletableFuture.runAsync(() -> {
+            var banner = sender.getInventory().getItemInMainHand().clone();
+            try {
+                var customShield = CustomShield.fromStack(shieldName, banner);
+                var insertResult = shieldManager.getShieldCollection().insertOne(customShield);
 
-            if (insertResult.getInsertedId() != null) {
-                sender.sendMessage(ChatColor.GREEN + "You've created shield " + ChatColor.WHITE + customShield.getName()
-                        + ChatColor.GREEN + " with the data\n" + ChatColor.WHITE + customShield.toString());
-            } else {
-                sender.sendMessage(ChatColor.RED + "The shield failed to be inserted.");
+                if (insertResult.getInsertedId() != null) {
+                    sender.sendMessage(
+                            ChatColor.GREEN + "You've created shield " + ChatColor.WHITE + customShield.getName()
+                                    + ChatColor.GREEN + " with the data\n" + ChatColor.WHITE + customShield.toString());
+                } else {
+                    sender.sendMessage(ChatColor.RED + "The shield failed to be inserted.");
+                }
+
+            } catch (ShieldInvalidTypeException | MongoWriteException e) {
+                ExceptionHandlers.handleVoidWithSender(null, e, sender);
             }
-
-        } catch (ShieldInvalidTypeException | MongoWriteException e) {
-            ExceptionHandlers.handleVoidWithSender(null, e, sender);
-        }
+        });
     }
 
 }
