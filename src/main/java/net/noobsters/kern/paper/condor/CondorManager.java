@@ -15,14 +15,17 @@ public class CondorManager {
     private @Getter Kern instance;
     private @Getter MongoCollection<CondorProfile> condorCollection;
     private @Getter MongoDatabase mongoDatabase;
-    
 
     public CondorManager(Kern instance) {
         this.instance = instance;
-        this.mongoDatabase = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor");
-        this.condorCollection = mongoDatabase.getCollection("auth", CondorProfile.class)
+        /** Make this database aware of the other types that might be used. */
+        this.mongoDatabase = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor")
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()),
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder()
+                                .register("net.noobsters.kern.paper.stats").automatic(true).build())));
+        ;
+        this.condorCollection = mongoDatabase.getCollection("auth", CondorProfile.class);
 
         instance.getCommandManager().getCommandCompletions().registerAsyncCompletion("condor_fields", c -> {
             return ImmutableList.of("name", "token", "credits", "limit", "super");

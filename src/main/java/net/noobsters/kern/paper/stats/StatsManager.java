@@ -1,32 +1,40 @@
 package net.noobsters.kern.paper.stats;
 
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.pojo.PojoCodecProvider;
-
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
-import net.noobsters.kern.paper.configs.DatabasesConfig;
-import net.noobsters.kern.paper.databases.impl.MongoHynix;
 
-@RequiredArgsConstructor
-public @Data class StatsManager {
-    private @NonNull Kern instance;
-    
-    MongoHynix mongoHynix = MongoHynix.createFromJson(DatabasesConfig.of("databases"));
-    MongoDatabase condorDatabase = mongoHynix.getMongoClient().getDatabase("condor")
-            .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                    CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
-    MongoCollection<PlayerStats> statsCollection = condorDatabase.getCollection("punishments", PlayerStats.class);
+public class StatsManager {
+    private @Getter Kern instance;
+    private @Getter StatsCMD statsCmd;
+    /** Mongo Objects */
+    private @Getter MongoCollection<PlayerStats> statsCollection;
 
-    public void updatePlayerUHCStat(String uuid, String field, int amount){
-        statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc." + field, 1));
+    public StatsManager(final Kern instance) {
+        this.instance = instance;
+        /** Instantiate, and register, the command. */
+        this.statsCmd = new StatsCMD(this);
+        /** Messy code but it works for now. Just reuse the condorManager database */
+        this.statsCollection = instance.getCondorManager().getMongoDatabase().getCollection("punishments",
+                PlayerStats.class);
+    }
+
+    /**
+     * Helper function that increases a given field of a player's statisitics by the
+     * given amount.
+     * 
+     * @param uuid   Player's UUID to be increased.
+     * @param field  Field to be increased. As of right now, only the following
+     *               exist: kills, deaths, and wins.
+     * @param amount Any positive or negative integer to incremente, or reduce, the
+     *               aforementioned field.
+     * @return {@link PlayerStats} object of the player, if existant, otherwise
+     *         null.
+     */
+    public PlayerStats increasePlayerUHCStatistic(String uuid, String field, int amount) {
+        return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc." + field, amount));
     }
 }

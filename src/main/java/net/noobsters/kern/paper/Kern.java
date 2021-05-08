@@ -10,9 +10,7 @@ import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.profiles.ProfileManager;
-import net.noobsters.kern.paper.shield.ShieldCMD;
 import net.noobsters.kern.paper.shield.ShieldManager;
-import net.noobsters.kern.paper.stats.StatsCMD;
 import net.noobsters.kern.paper.stats.StatsManager;
 
 public class Kern extends JavaPlugin {
@@ -35,21 +33,19 @@ public class Kern extends JavaPlugin {
     chatManager = new ChatManager(this);
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
-    statsManager = new StatsManager(this);
 
     // commands
     chatManager = new ChatManager(this);
 
     // commands
-    commandManager.registerCommand(new ShieldCMD(this));
     commandManager.registerCommand(new GlobalMute(this));
-    commandManager.registerCommand(new StatsCMD(this));
 
     /** Do this last always */
     this.profileManager = new ProfileManager(this);
     this.condorManager = new CondorManager(this);
+    this.statsManager = new StatsManager(this);
 
-    shieldManager = new ShieldManager(this);
+    
     /** RapidInv manager */
     RapidManager.register(this);
   }
