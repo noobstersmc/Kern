@@ -13,6 +13,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Flags;
+import co.aikar.commands.annotation.Optional;
 import fr.mrmicky.fastinv.ItemBuilder;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.guis.RapidInv;
@@ -40,16 +41,19 @@ public class StatsCMD extends BaseCommand {
 
     @Default
     @CommandCompletion("@players")
-    public void statsOfPlayer(Player sender, @Flags("other") String target) {
+    public void statsOfPlayer(Player sender, @Optional @Flags("other") String target) {
+
+        var player = target == null ? sender.getName() : target;
+        
         /** Execute inside a different thread to avoid stopping the main thread. */
         CompletableFuture.runAsync(() -> {
             /** Obtain the stats inventory. */
-            var inv = getStatsGui(target);
+            var inv = getStatsGui(player);
             /** Ensure the given object isn't null. If valid, open inv. */
             if (inv != null) {
                 inv.open(sender, statsManager.getInstance());
             } else {
-                sender.sendMessage(target + "'s stats inventory returned null");
+                sender.sendMessage(ChatColor.RED + target + " couldn't find statistics record.");
             }
             /** Handle any posible exceptions. [⬇] */
         }).handle((a, b) -> ExceptionHandlers.handleVoidWithSender(a, b, sender));
