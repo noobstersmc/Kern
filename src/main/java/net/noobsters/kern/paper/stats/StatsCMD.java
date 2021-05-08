@@ -2,15 +2,8 @@ package net.noobsters.kern.paper.stats;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -25,8 +18,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
-import net.noobsters.kern.paper.configs.DatabasesConfig;
-import net.noobsters.kern.paper.databases.impl.MongoHynix;
 import net.noobsters.kern.paper.guis.RapidInv;
 import net.noobsters.kern.paper.utils.PlayerDBUtil;
 
@@ -38,12 +29,6 @@ public class StatsCMD extends BaseCommand {
         private String color1 = ChatColor.of("#12af5c") + "";
         private String white = ChatColor.WHITE + "";
 
-        MongoHynix mongoHynix = MongoHynix.createFromJson(DatabasesConfig.of("databases"));
-        MongoDatabase condorDatabase = mongoHynix.getMongoClient().getDatabase("condor").withCodecRegistry(
-                        CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries
-                                        .fromProviders(PojoCodecProvider.builder().automatic(true).build())));
-        MongoCollection<PlayerStats> statsCollection = condorDatabase.getCollection("punishments", PlayerStats.class);
-
         @Default
         @CommandCompletion("@onlineplayers")
         public void statsOfPlayer(Player sender, @Flags("other") String target) {
@@ -54,7 +39,7 @@ public class StatsCMD extends BaseCommand {
                                         sender.sendMessage(ChatColor.RED + target + " couldn't find statistics record.");
                                         return;
                                 }
-                                Bukkit.broadcastMessage("NULL GUI");
+                                
                                 gui.open(sender);
                         });
                 } catch (Exception e) {
@@ -75,6 +60,8 @@ public class StatsCMD extends BaseCommand {
         }
 
         public RapidInv getStatsGui(String player) {
+                var manager = instance.getStatsManager();
+                var statsCollection = manager.getStatsCollection();
                 
                 var playerMinecraft = PlayerDBUtil.getPlayerObject(player);
                 if (playerMinecraft == null)
@@ -210,7 +197,7 @@ public class StatsCMD extends BaseCommand {
 
                 gui.setItem(32, topRanking.build());
 
-                statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc.kills", 1));
+                
                 return gui;
         }
 

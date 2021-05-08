@@ -15,6 +15,7 @@ public class CondorManager {
     private @Getter Kern instance;
     private @Getter MongoCollection<CondorProfile> condorCollection;
     private @Getter MongoDatabase mongoDatabase;
+    
 
     public CondorManager(Kern instance) {
         this.instance = instance;

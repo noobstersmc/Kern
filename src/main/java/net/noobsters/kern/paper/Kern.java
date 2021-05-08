@@ -13,6 +13,7 @@ import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.shield.ShieldCMD;
 import net.noobsters.kern.paper.shield.ShieldManager;
 import net.noobsters.kern.paper.stats.StatsCMD;
+import net.noobsters.kern.paper.stats.StatsManager;
 
 public class Kern extends JavaPlugin {
   private @Getter PaperCommandManager commandManager;
@@ -21,6 +22,7 @@ public class Kern extends JavaPlugin {
   private @Getter ShieldManager shieldManager;
   private @Getter CondorManager condorManager;
   private @Getter ProfileManager profileManager;
+  private @Getter StatsManager statsManager;
 
   private static @Getter Kern instance;
 
@@ -33,6 +35,7 @@ public class Kern extends JavaPlugin {
     chatManager = new ChatManager(this);
     commandManager = new PaperCommandManager(this);
     listenerManager = new ListenerManager(this);
+    statsManager = new StatsManager(this);
 
     // commands
     chatManager = new ChatManager(this);
