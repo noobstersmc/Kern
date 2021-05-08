@@ -96,4 +96,5 @@ shadowJar {
     minimize();
 }
 
+
 build.dependsOn shadowJar
