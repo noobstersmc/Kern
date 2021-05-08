@@ -42,7 +42,7 @@ public class ShieldListener implements Listener {
                 e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());
             } else {
                 System.out.println("Shield not present");
-                Bukkit.getScheduler().runTaskLaterAsynchronously(shieldManager.getInstance(), ()->{
+                Bukkit.getScheduler().runTaskLaterAsynchronously(shieldManager.getInstance(), () -> {
                     var shieldAgain = shieldManager.getShieldFromCache(shieldName);
                     e.getInventory().setResult(shieldAgain.applyCustomBannerData(result));
                     e.getInventory().getViewers().forEach(all -> ((Player) all).updateInventory());

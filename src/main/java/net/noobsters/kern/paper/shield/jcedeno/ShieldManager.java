@@ -14,6 +14,7 @@ import com.mongodb.client.model.Updates;
 
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bukkit.Bukkit;
 
 import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
@@ -51,6 +52,15 @@ public class ShieldManager {
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
         /** Obtain the shield collection as a colelction of CustomShields. */
         this.shieldCollection = mongoDatabase.getCollection("shield", CustomShield.class);
+        /** Copy the contents onto the local cache */
+        shieldCollection.find().forEach(all -> shieldLocalCache.put(all.getName(), all));
+        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+            shieldCollection.watch().forEach(shields -> {
+                var doc = shields.getFullDocument();
+                System.out.println("Updating shield: " + doc.getName());
+                shieldLocalCache.put(doc.getName(), doc);
+            });
+        });
         /** Obtain the punishments collection as a collection of ShieldProfiles */
         this.shieldProfileCollection = instance.getCondorManager().getMongoDatabase()
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
