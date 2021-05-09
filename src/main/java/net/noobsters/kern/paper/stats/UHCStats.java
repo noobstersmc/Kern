@@ -85,14 +85,14 @@ public class UHCStats {
     public double getKillDeathRatio() {
         final var deaths = this.getDeaths();
         /** If dividing by 0, change the operation to divide by 1 */
-        final var percentualValue = this.getKills() / (double) (deaths != 0 ? deaths : 1);
+        final var percentualValue = (this.getKills() / 100.0) / (double) (deaths != 0 ? deaths : 1);
         return (percentualValue * 100);
     }
 
     public double getProjectileAccuracy() {
         final var hits = this.getProjectileHit();
         /** If dividing by 0, change the operation to divide by 1 */
-        final var percentualValue = this.getProjectilesShot() / (double) (hits != 0 ? hits : 1);
+        final var percentualValue = (this.getProjectilesShot() / 100.0) / (double) (hits != 0 ? hits : 1);
         return (percentualValue * 100);
 
     }

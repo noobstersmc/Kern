@@ -10,6 +10,8 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 
 import lombok.Getter;
 import net.noobsters.kern.paper.Kern;
+import net.noobsters.kern.paper.shield.CustomShield;
+import net.noobsters.kern.paper.stats.PlayerStats;
 
 public class CondorManager {
     private @Getter Kern instance;
@@ -23,7 +25,7 @@ public class CondorManager {
                 .withCodecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder()
-                                .register("net.noobsters.kern.paper.stats").automatic(true).build())));
+                                .register(CustomShield.class, PlayerStats.class).automatic(true).build())));
         ;
         this.condorCollection = mongoDatabase.getCollection("auth", CondorProfile.class);
 
