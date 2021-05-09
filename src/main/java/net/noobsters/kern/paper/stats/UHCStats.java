@@ -25,6 +25,10 @@ public class UHCStats {
         return doc.getInteger("win_streak", 0);
     }
 
+    public int getWinStreakCount() {
+        return doc.getInteger("win_streak_count", 0);
+    }
+
     public int getKills() {
         return doc.getInteger("kills", 0);
     }
