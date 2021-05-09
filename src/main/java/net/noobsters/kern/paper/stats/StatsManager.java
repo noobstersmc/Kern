@@ -37,4 +37,8 @@ public class StatsManager {
     public PlayerStats increasePlayerUHCStatistic(String uuid, String field, int amount) {
         return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc." + field, amount));
     }
+
+    public PlayerStats setPlayerUHCStatistic(String uuid, String field, int amount) {
+        return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.set("stats.uhc." + field, amount));
+    }
 }
