@@ -2,7 +2,8 @@ package net.noobsters.kern.paper.stats;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.mongodb.client.model.Filters;
+import static com.mongodb.client.model.Filters.*;
+import static org.bukkit.Material.*;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -73,7 +74,7 @@ public class StatsCMD extends BaseCommand {
 		if (genericPlayer == null)
 			return null;
 		/** Query the mongo db for a player's statistics. */
-		var stats = statsManager.getStatsCollection().find(Filters.eq(genericPlayer.getUuid().toString())).first();
+		var stats = statsManager.getStatsCollection().find(eq(genericPlayer.getUuid().toString())).first();
 		/** If stats are not present, retur null. */
 		// TODO: Don't return but use all data as 0 values.
 		if (stats == null)
@@ -115,51 +116,51 @@ public class StatsCMD extends BaseCommand {
 		var divisibleDeaths = deathsV != 0 ? deathsV : 1;
 
 		/** Setup all items for the gui. */
-		var rank = item(Material.NETHER_STAR).name(color1 + "Rating: " + white + "Unrated").build();
+		var rank = item(NETHER_STAR).name(color1 + "Rating: " + white + "Unrated").build();
 
-		var wins = item(Material.TOTEM_OF_UNDYING).name(color1 + "Wins: " + white + winsV)
+		var wins = item(TOTEM_OF_UNDYING).name(color1 + "Wins: " + white + winsV)
 				.lore(color1 + "Highest Win streak: " + white + winstreakV).build();
 
-		var kills = item(Material.IRON_SWORD).name(color1 + "Kills: " + white + killsV).flags(ItemFlag.HIDE_ATTRIBUTES)
+		var kills = item(IRON_SWORD).name(color1 + "Kills: " + white + killsV).flags(ItemFlag.HIDE_ATTRIBUTES)
 				.build();
 
-		var KDR = item(Material.IRON_AXE).name(color1 + "KDR: " + white + kdrV).flags(ItemFlag.HIDE_ATTRIBUTES).build();
+		var KDR = item(IRON_AXE).name(color1 + "KDR: " + white + kdrV).flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
-		var killRecord = item(Material.DIAMOND_SWORD).name(color1 + "Kill Record: " + white + killRecordV)
+		var killRecord = item(DIAMOND_SWORD).name(color1 + "Kill Record: " + white + killRecordV)
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
-		var timePlayed = item(Material.CLOCK)
+		var timePlayed = item(CLOCK)
 				.name(color1 + "Time played: " + white + (timePlayedV / 1000.0) / 120 + " hours")
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
-		var deaths = item(Material.REDSTONE).name(color1 + "Deaths: " + white + deathsV).flags(ItemFlag.HIDE_ATTRIBUTES)
+		var deaths = item(REDSTONE).name(color1 + "Deaths: " + white + deathsV).flags(ItemFlag.HIDE_ATTRIBUTES)
 				.build();
 
-		var mobs = item(Material.SHULKER_SPAWN_EGG).name(color1 + "Hostile mobs: " + white + hostileMobsV)
+		var mobs = item(SHULKER_SPAWN_EGG).name(color1 + "Hostile mobs: " + white + hostileMobsV)
 				.lore(color1 + "Peaceful mobs: " + white + peacefulMobsV).build();
 
-		var accuracy = item(Material.BOW).name(color1 + "Projectile accuracy: " + white + projectileAccuracyV + "%")
+		var accuracy = item(BOW).name(color1 + "Projectile accuracy: " + white + projectileAccuracyV + "%")
 				.build();
 
-		var apples = item(Material.ENCHANTED_GOLDEN_APPLE).name(color1 + "Notch Apples consumed: " + white + notchV)
+		var apples = item(ENCHANTED_GOLDEN_APPLE).name(color1 + "Notch Apples consumed: " + white + notchV)
 				.lore(color1 + "Golden Heads consumed: " + white + gheadV,
 						color1 + "Golden Apples consumed: " + white + gappV)
 				.build();
 
-		var mining = item(Material.NETHERITE_PICKAXE).name(color1 + "Diamonds mined: " + white + diamondV)
+		var mining = item(NETHERITE_PICKAXE).name(color1 + "Diamonds mined: " + white + diamondV)
 				.lore(color1 + "Gold mined: " + white + goldV, color1 + "Netherite mined: " + white + netheriteV,
 						color1 + "DGR: " + white + diamondV / divisibleDeaths,
 						color1 + "GGR: " + white + goldV / divisibleDeaths,
 						color1 + "NGR: " + white + netheriteV / divisibleDeaths)
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
-		var stampBook = item(Material.KNOWLEDGE_BOOK).name(color2 + "Stamp book").build();
+		var stampBook = item(KNOWLEDGE_BOOK).name(color2 + "Stamp book").build();
 
-		var topWins = item(Material.TOTEM_OF_UNDYING).name(color3 + "Top wins").build();
+		var topWins = item(TOTEM_OF_UNDYING).name(color3 + "Top wins").build();
 
-		var topKillRecord = item(Material.DIAMOND_SWORD).flags(ItemFlag.HIDE_ATTRIBUTES)
+		var topKillRecord = item(DIAMOND_SWORD).flags(ItemFlag.HIDE_ATTRIBUTES)
 				.name(color3 + "Top kill record").build();
 				
-		var topRanking = item(Material.NETHER_STAR).name(color3 + "Top champions").build();
+		var topRanking = item(NETHER_STAR).name(color3 + "Top champions").build();
 
 		/** Set all items to the GUI */
 		gui.setItem(1, rank);
