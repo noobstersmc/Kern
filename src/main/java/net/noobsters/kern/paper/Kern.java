@@ -41,18 +41,17 @@ public class Kern extends JavaPlugin {
     commandManager.registerCommand(new GlobalMute(this));
 
     /** Do this last always */
-    this.profileManager = new ProfileManager(this);
     this.condorManager = new CondorManager(this);
+    this.profileManager = new ProfileManager(this);
     this.statsManager = new StatsManager(this);
 
-    
     /** RapidInv manager */
     RapidManager.register(this);
   }
 
   @Override
   public void onDisable() {
-    profileManager.getMongoHynix().getMongoClient().close();
+    condorManager.getMongoHynix().getMongoClient().close();
 
   }
 
