@@ -7,40 +7,47 @@ import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class PlayerStats {
     @BsonId
-    private String uuid;
+    private @Getter @Setter String uuid;
     @BsonProperty(value = "stats")
-    private Map<String, Document> stats = new HashMap<>();
+    private @Getter @Setter Map<String, Document> stats = new HashMap<>();
 
+    /**
+     * Default constructor for a PlayerStats Object.
+     * 
+     * @param uuid  Stringified uuid, with dashes included.
+     * @param stats The stats document map of the user.
+     */
     public PlayerStats(String uuid, Map<String, Document> stats) {
         this.uuid = uuid;
         this.stats = stats;
         stats.get("uhc");
     }
 
+    /**
+     * Empty constructor for Pojoc.
+     */
     public PlayerStats() {
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public Map<String, Document> getStats() {
-        return stats;
-    }
-
-    public void setStats(Map<String, Document> stats) {
-        this.stats = stats;
     }
 
     @Override
     public String toString() {
         return "PlayerStats(uuid=" + this.uuid + ", stats=" + this.stats + ")";
+    }
+
+    /**
+     * Helper function to auto-cast the uhc stats object if present in the
+     * statistics map of the user.
+     * 
+     * @return {@link UHCStats} or Null if not present.
+     */
+    public UHCStats obtainUHCStats() {
+        var uhcStats = stats.get("uhc");
+        return uhcStats != null ? UHCStats.from(uhcStats) : null;
     }
 
 }
