@@ -26,7 +26,7 @@ java {
 }
 
 group = 'net.noobsters'
-version = '0.3D'
+version = '0.3E'
 
 repositories {
     mavenCentral()

@@ -34,11 +34,15 @@ public class StatsManager {
      * @return {@link PlayerStats} object of the player, if existant, otherwise
      *         null.
      */
-    public PlayerStats increasePlayerUHCStatistic(String uuid, String field, int amount) {
+    public PlayerStats incUHCStats(String uuid, String field, int amount) {
         return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc." + field, amount));
     }
 
-    public PlayerStats setPlayerUHCStatistic(String uuid, String field, int amount) {
+    public PlayerStats incUHCStats(String uuid, String field, long amount) {
+        return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.inc("stats.uhc." + field, amount));
+    }
+
+    public PlayerStats setUHCStats(String uuid, String field, int amount) {
         return statsCollection.findOneAndUpdate(Filters.eq(uuid), Updates.set("stats.uhc." + field, amount));
     }
 }
