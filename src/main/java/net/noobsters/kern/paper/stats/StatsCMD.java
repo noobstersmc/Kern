@@ -1,9 +1,21 @@
 package net.noobsters.kern.paper.stats;
 
-import java.util.concurrent.CompletableFuture;
+import static com.mongodb.client.model.Filters.eq;
+import static org.bukkit.Material.BOW;
+import static org.bukkit.Material.CLOCK;
+import static org.bukkit.Material.DIAMOND_SWORD;
+import static org.bukkit.Material.ENCHANTED_GOLDEN_APPLE;
+import static org.bukkit.Material.IRON_AXE;
+import static org.bukkit.Material.IRON_SWORD;
+import static org.bukkit.Material.KNOWLEDGE_BOOK;
+import static org.bukkit.Material.NETHERITE_PICKAXE;
+import static org.bukkit.Material.NETHER_STAR;
+import static org.bukkit.Material.REDSTONE;
+import static org.bukkit.Material.SHULKER_SPAWN_EGG;
+import static org.bukkit.Material.TOTEM_OF_UNDYING;
 
-import static com.mongodb.client.model.Filters.*;
-import static org.bukkit.Material.*;
+import java.text.DecimalFormat;
+import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,6 +36,7 @@ import net.noobsters.kern.paper.utils.PlayerDBUtil.GenericPlayer;
 @CommandAlias("stats")
 public class StatsCMD extends BaseCommand {
 	/** Constant colors */
+	DecimalFormat numberFormat = new DecimalFormat("#.00");
 	private static final String color1 = ChatColor.of("#12af5c").toString();
 	private static final String color2 = ChatColor.of("#db0f00").toString();
 	private static final String white = ChatColor.WHITE.toString();
@@ -123,13 +136,13 @@ public class StatsCMD extends BaseCommand {
 		var kills = item(IRON_SWORD).name(color1 + "Kills: " + white + killsV).flags(ItemFlag.HIDE_ATTRIBUTES)
 				.build();
 
-		var KDR = item(IRON_AXE).name(color1 + "KDR: " + white + kdrV).flags(ItemFlag.HIDE_ATTRIBUTES).build();
+		var KDR = item(IRON_AXE).name(color1 + "KDR: " + white + numberFormat.format(kdrV)).flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var killRecord = item(DIAMOND_SWORD).name(color1 + "Kill Record: " + white + killRecordV)
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var timePlayed = item(CLOCK)
-				.name(color1 + "Time played: " + white + (timePlayedV / 1000.0) / 120 + " hours")
+				.name(color1 + "Time played: " + white + numberFormat.format((timePlayedV / 1000.0) / 120 + " hours"))
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var deaths = item(REDSTONE).name(color1 + "Deaths: " + white + deathsV).flags(ItemFlag.HIDE_ATTRIBUTES)
@@ -138,7 +151,7 @@ public class StatsCMD extends BaseCommand {
 		var mobs = item(SHULKER_SPAWN_EGG).name(color1 + "Hostile mobs: " + white + hostileMobsV)
 				.lore(color1 + "Peaceful mobs: " + white + peacefulMobsV).build();
 
-		var accuracy = item(BOW).name(color1 + "Projectile accuracy: " + white + projectileAccuracyV + "%")
+		var accuracy = item(BOW).name(color1 + "Projectile accuracy: " + white + numberFormat.format(projectileAccuracyV) + "%")
 				.build();
 
 		var apples = item(ENCHANTED_GOLDEN_APPLE).name(color1 + "Notch Apples consumed: " + white + notchV)
@@ -148,9 +161,9 @@ public class StatsCMD extends BaseCommand {
 
 		var mining = item(NETHERITE_PICKAXE).name(color1 + "Diamonds mined: " + white + diamondV)
 				.lore(color1 + "Gold mined: " + white + goldV, color1 + "Netherite mined: " + white + netheriteV,
-						color1 + "DGR: " + white + diamondV / divisibleDeaths,
-						color1 + "GGR: " + white + goldV / divisibleDeaths,
-						color1 + "NGR: " + white + netheriteV / divisibleDeaths)
+						color1 + "DGR: " + white + numberFormat.format(diamondV / divisibleDeaths),
+						color1 + "GGR: " + white + numberFormat.format(goldV / divisibleDeaths),
+						color1 + "NGR: " + white + numberFormat.format(netheriteV / divisibleDeaths))
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 		var stampBook = item(KNOWLEDGE_BOOK).name(color2 + "Stamp book").build();
 
