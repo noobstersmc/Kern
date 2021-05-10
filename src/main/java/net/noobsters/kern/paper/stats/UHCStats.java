@@ -41,9 +41,8 @@ public class UHCStats {
         return doc.getInteger("kill_record", 0);
     }
 
-    public Long getTimePlayed() {
-        final var time = doc.getLong("time_played");
-        return time != null ? time : 0L;
+    public int getTimePlayed() {
+        return doc.getInteger("time_played", 0);
     }
 
     public int getHostileMobsKilled() {

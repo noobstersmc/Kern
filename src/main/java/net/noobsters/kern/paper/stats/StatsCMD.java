@@ -26,7 +26,6 @@ public class StatsCMD extends BaseCommand {
 	/** Constant colors */
 	private static final String color1 = ChatColor.of("#12af5c").toString();
 	private static final String color2 = ChatColor.of("#db0f00").toString();
-	private static final String color3 = ChatColor.of("#f3be12").toString();
 	private static final String white = ChatColor.WHITE.toString();
 	/** StatsManager instance */
 	private StatsManager statsManager;
@@ -130,7 +129,7 @@ public class StatsCMD extends BaseCommand {
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var timePlayed = item(CLOCK)
-				.name(color1 + "Time played: " + white + (timePlayedV / 1000.0) / 120 + " hours")
+				.name(color1 + "Time played: " + white + timePlayedV / 60 + " hours")
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var deaths = item(REDSTONE).name(color1 + "Deaths: " + white + deathsV).flags(ItemFlag.HIDE_ATTRIBUTES)
@@ -155,12 +154,11 @@ public class StatsCMD extends BaseCommand {
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 		var stampBook = item(KNOWLEDGE_BOOK).name(color2 + "Stamp book").build();
 
-		var topWins = item(TOTEM_OF_UNDYING).name(color3 + "Top wins").build();
+		//var topWins = item(TOTEM_OF_UNDYING).name(color3 + "Top wins").build();
 
-		var topKillRecord = item(DIAMOND_SWORD).flags(ItemFlag.HIDE_ATTRIBUTES)
-				.name(color3 + "Top kill record").build();
+		//var topKillRecord = item(DIAMOND_SWORD).flags(ItemFlag.HIDE_ATTRIBUTES).name(color3 + "Top kill record").build();
 				
-		var topRanking = item(NETHER_STAR).name(color3 + "Top champions").build();
+		//var topRanking = item(NETHER_STAR).name(color3 + "Top champions").build();
 
 		/** Set all items to the GUI */
 		gui.setItem(1, rank);
@@ -175,9 +173,9 @@ public class StatsCMD extends BaseCommand {
 		gui.setItem(13, apples);
 		gui.setItem(14, mining);
 		gui.setItem(15, stampBook);
-		gui.setItem(30, topWins);
-		gui.setItem(31, topKillRecord);
-		gui.setItem(32, topRanking);
+		//gui.setItem(30, topWins);
+		//gui.setItem(31, topKillRecord);
+		//gui.setItem(32, topRanking);
 
 		/** Return the gui object to be used now. */
 		return gui;
