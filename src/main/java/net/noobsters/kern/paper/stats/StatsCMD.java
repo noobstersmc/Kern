@@ -142,7 +142,7 @@ public class StatsCMD extends BaseCommand {
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var timePlayed = item(CLOCK)
-				.name(color1 + "Time played: " + white + numberFormat.format((timePlayedV / 1000.0) / 180) + " hours")
+				.name(color1 + "Time played: " + white + numberFormat.format(((timePlayedV / 1000.0) / 60) / 60) + " hours")
 				.flags(ItemFlag.HIDE_ATTRIBUTES).build();
 
 		var deaths = item(REDSTONE).name(color1 + "Deaths: " + white + deathsV).flags(ItemFlag.HIDE_ATTRIBUTES)
