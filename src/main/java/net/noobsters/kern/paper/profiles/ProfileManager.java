@@ -9,16 +9,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Updates;
 
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,8 +28,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.noobsters.kern.paper.Kern;
-import net.noobsters.kern.paper.configs.DatabasesConfig;
-import net.noobsters.kern.paper.databases.impl.MongoHynix;
 import net.noobsters.kern.paper.punishments.PunishmentCommand;
 import net.noobsters.kern.paper.punishments.events.PlayerBannedEvent;
 import net.noobsters.kern.paper.punishments.events.PlayerMutedEvent;
@@ -42,22 +36,14 @@ import net.noobsters.kern.paper.punishments.events.PlayerUnmutedEvent;
 
 public class ProfileManager implements Listener {
     private static @Getter Map<String, PlayerProfile> cache = Collections.synchronizedMap(new HashMap<>());
-    private static @Getter DatabasesConfig dbConfig = DatabasesConfig.of("databases");
-    private @Getter MongoHynix mongoHynix;
-    private @Getter MongoDatabase database;
     private @Getter MongoCollection<PlayerProfile> collection;
     private @Getter Kern instance;
 
     public ProfileManager(final Kern instance) {
         this.instance = instance;
-
-        this.mongoHynix = MongoHynix.createFromJson(dbConfig);
         try {
-            this.database = mongoHynix.getMongoClient().getDatabase("condor").withCodecRegistry(CodecRegistries
-                    .fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(
-                            PojoCodecProvider.builder().automatic(true).build())));
 
-            this.collection = database.getCollection("punishments", PlayerProfile.class);
+            this.collection = instance.getCondorManager().getMongoDatabase().getCollection("punishments", PlayerProfile.class);
             // If everything is okay, register the listener.
             Bukkit.getServer().getPluginManager().registerEvents(this, instance);
             instance.getCommandManager().registerCommand(new PunishmentCommand(instance));

@@ -358,6 +358,13 @@ public class RapidInv implements InventoryHolder {
         player.openInventory(inventory);
     }
 
+    /**
+     * Utility function that allows developer to open inventories from an
+     * asynchronous thread.
+     * 
+     * @param player Player that will see the inventory
+     * @param plugin Plugin instance to schedule the inventory openning task.
+     */
     public void open(Player player, Plugin plugin) {
         Bukkit.getScheduler().runTask(plugin, () -> player.openInventory(inventory));
     }

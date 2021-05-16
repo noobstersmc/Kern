@@ -34,7 +34,7 @@ public class ChatListener implements Listener {
     /*
      * Chat Channels
      */
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void chatChannel(AsyncPlayerChatEvent e) {
         var player = e.getPlayer();
         var msg = e.getMessage();

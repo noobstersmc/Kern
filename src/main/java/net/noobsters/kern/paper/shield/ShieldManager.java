@@ -1,16 +1,10 @@
 package net.noobsters.kern.paper.shield;
 
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.entity.Player;
@@ -33,18 +27,14 @@ public class ShieldManager implements Listener {
     private @Getter HashMap<String, CustomShield> playerCurrentShield = new HashMap<>();
     private @Getter HashMap<String, CustomShield> globalShieldList = new HashMap<>();
 
-    private @Getter MongoDatabase db;
     private @Getter MongoCollection<CustomShield> shieldCollection;
 
     public ShieldManager(final Kern instance) {
         this.instance = instance;
-        this.db = instance.getProfileManager().getMongoHynix().getMongoClient().getDatabase("condor")
-                .withCodecRegistry(fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                        fromProviders(PojoCodecProvider.builder().automatic(true).build())));
-        this.shieldCollection = db.getCollection("shields", CustomShield.class);
+        this.shieldCollection = instance.getCondorManager().getMongoDatabase().getCollection("shields",
+                CustomShield.class);
 
-
-        //instance.getServer().getPluginManager().registerEvents(this, instance);
+        // instance.getServer().getPluginManager().registerEvents(this, instance);
 
     }
 

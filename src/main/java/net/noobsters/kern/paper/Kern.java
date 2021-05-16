@@ -11,6 +11,8 @@ import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.shield.jcedeno.ShieldManager;
+import net.noobsters.kern.paper.shield.ShieldManager;
+import net.noobsters.kern.paper.stats.StatsManager;
 
 public class Kern extends JavaPlugin {
   private @Getter PaperCommandManager commandManager;
@@ -19,6 +21,7 @@ public class Kern extends JavaPlugin {
   private @Getter ShieldManager shieldManager;
   private @Getter CondorManager condorManager;
   private @Getter ProfileManager profileManager;
+  private @Getter StatsManager statsManager;
 
   private static @Getter Kern instance;
 
@@ -39,17 +42,17 @@ public class Kern extends JavaPlugin {
     commandManager.registerCommand(new GlobalMute(this));
 
     /** Do this last always */
-    this.profileManager = new ProfileManager(this);
     this.condorManager = new CondorManager(this);
+    this.profileManager = new ProfileManager(this);
+    this.statsManager = new StatsManager(this);
 
-    shieldManager = new ShieldManager(this);
     /** RapidInv manager */
     RapidManager.register(this);
   }
 
   @Override
   public void onDisable() {
-    profileManager.getMongoHynix().getMongoClient().close();
+    condorManager.getMongoHynix().getMongoClient().close();
 
   }
 
