@@ -12,6 +12,7 @@ import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.profiles.ProfileManager;
 import net.noobsters.kern.paper.shield.ShieldManager;
 import net.noobsters.kern.paper.stats.StatsManager;
+import net.noobsters.kern.paper.shield.jcedeno.ShieldManager;
 
 public class Kern extends JavaPlugin {
   private @Getter PaperCommandManager commandManager;
