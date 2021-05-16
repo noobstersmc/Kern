@@ -1,6 +1,5 @@
 package net.noobsters.kern.paper.condor;
 
-import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -33,12 +32,10 @@ public class CondorManager {
                         CodecRegistries.fromProviders(PojoCodecProvider.builder()
                                 .register(CustomShield.class, PlayerStats.class, PlayerProfile.class).automatic(true)
                                 .build())));
-        ;
+      
         this.condorCollection = mongoDatabase.getCollection("auth", CondorProfile.class);
 
-        instance.getCommandManager().getCommandCompletions().registerAsyncCompletion("condor_fields", c -> {
-            return ImmutableList.of("name", "token", "credits", "limit", "super");
-        });
+
         instance.getCommandManager().registerCommand(new CondorProfileCMD(this));
     }
 

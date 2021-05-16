@@ -42,6 +42,7 @@ public class ProfileManager implements Listener {
     public ProfileManager(final Kern instance) {
         this.instance = instance;
         try {
+
             this.collection = instance.getCondorManager().getMongoDatabase().getCollection("punishments", PlayerProfile.class);
             // If everything is okay, register the listener.
             Bukkit.getServer().getPluginManager().registerEvents(this, instance);

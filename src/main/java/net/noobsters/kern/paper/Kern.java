@@ -10,6 +10,7 @@ import net.noobsters.kern.paper.condor.CondorManager;
 import net.noobsters.kern.paper.guis.RapidManager;
 import net.noobsters.kern.paper.listeners.ListenerManager;
 import net.noobsters.kern.paper.profiles.ProfileManager;
+import net.noobsters.kern.paper.shield.jcedeno.ShieldManager;
 import net.noobsters.kern.paper.shield.ShieldManager;
 import net.noobsters.kern.paper.stats.StatsManager;
 
