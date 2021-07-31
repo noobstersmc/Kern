@@ -118,12 +118,12 @@ public class ChatListener implements Listener {
 
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void setFormat(AsyncPlayerChatEvent e) {
         e.setFormat(getFormatted());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void onChatHigh(AsyncPlayerChatEvent e) {
         String format = e.getFormat();
         var vaultChat = instance.getChatManager().getVaultChat();
