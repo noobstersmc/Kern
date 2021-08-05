@@ -28,6 +28,7 @@ jobs:
     # Make gradlew executable
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+    
     # Pull the gradle.properties from the repo secrets
     - name: Restore gradle.properties
       env:
@@ -35,8 +36,10 @@ jobs:
       shell: bash
       run: |
         mkdir -p ~/.gradle/
+        echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
         echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
         echo ${GRADLE_PROPERTIES} > ~/.gradle/gradle.properties
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
     # Build the project
     - name: Build with Gradle
       run: ./gradlew build
