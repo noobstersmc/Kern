@@ -26,7 +26,7 @@ java {
 }
 
 group = 'net.noobsters'
-version = '0.4E1'
+version = '0.4E'
 
 repositories {
     mavenCentral()
@@ -43,11 +43,11 @@ repositories {
     /*Noobsters/Hynix Repository */
     
     maven {
+        url 'https://dev.repo.noobsters.net/'
         credentials {
             username "${hynx_usr}"
             password "${hynx_pass}"
         }
-        url "https://hynix-repository.ue.r.appspot.com"
     }
 }
 
@@ -80,7 +80,7 @@ publishing {
     }
     repositories {
         maven {
-            url 'https://hynix-repository.ue.r.appspot.com/'
+            url 'https://dev.repo.noobsters.net/'
             credentials {
                 username "${hynx_usr}"
                 password "${hynx_pass}"
