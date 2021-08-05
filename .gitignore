@@ -11,17 +11,16 @@ buildNumber.properties
 .vscode/
 .classpath
 
-
 ### Gradle & IntelliJ ###
 .github/
 .gradle/
+gradle.properties
 .idea/
 build/
 out/
 run/
 *.iml
 .idea_modules/
-
 
 ### Eclipse ###
 .metadata
@@ -39,14 +38,12 @@ local.properties
 .recommenders/
 .apt_generated/
 
-
 ### Linux ###
 *~
 .fuse_hidden*
 .directory
 .Trash-*
 .nfs*
-
 
 ### macOS ###
 .DS_Store
@@ -67,14 +64,12 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-
 ### NetBeans ###
 nbproject/private/
 nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-
 
 ### Windows ###
 # Windows thumbnail cache files

@@ -26,7 +26,7 @@ java {
 }
 
 group = 'net.noobsters'
-version = '0.3E'
+version = '0.4E1'
 
 repositories {
     mavenCentral()
@@ -41,10 +41,11 @@ repositories {
     maven { url 'https://repo.md-5.net/content/groups/public/'}    
     maven { url "https://repo.dmulloy2.net/repository/public/" }
     /*Noobsters/Hynix Repository */
+    
     maven {
         credentials {
-            username 'jcedeno'
-            password 'PinchePerro'
+            username "${hynx_usr}"
+            password "${hynx_pass}"
         }
         url "https://hynix-repository.ue.r.appspot.com"
     }
@@ -70,18 +71,24 @@ dependencies {//Paper
 
 }
 
-uploadArchives {
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
     repositories {
-        mavenDeployer{
-            repository(url: "https://hynix-repository.ue.r.appspot.com/") {
-                authentication(userName: "jcedeno", password: "PinchePerro")
+        maven {
+            url 'https://hynix-repository.ue.r.appspot.com/'
+            credentials {
+                username "${hynx_usr}"
+                password "${hynx_pass}"
             }
-            pom.version = "${version}-SNAPSHOT"
-            pom.artifactId = "kern"
-            pom.groupId = "net.noobsters"
         }
     }
 }
+
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
