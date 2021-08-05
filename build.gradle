@@ -5,10 +5,8 @@
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds
  */
 plugins{
-    id 'eclipse'
     id 'java'
     id 'maven-publish'
-    id 'maven'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
     id "io.freefair.lombok" version "5.3.0"
 }
@@ -26,7 +24,7 @@ java {
 }
 
 group = 'net.noobsters'
-version = '0.4E'
+version = '0.4E-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -37,11 +35,10 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.aikar.co/content/groups/aikar/' }
     
-    /**Estos dos */
     maven { url 'https://repo.md-5.net/content/groups/public/'}    
     maven { url "https://repo.dmulloy2.net/repository/public/" }
-    /*Noobsters/Hynix Repository */
-    
+
+    /*Noobsters/Hynix Repository */    
     maven {
         url 'https://dev.repo.noobsters.net/'
         credentials {
@@ -100,7 +97,8 @@ processResources {
 shadowJar {
     relocate 'co.aikar.commands', 'shadded.kern.acf'
     relocate 'fr.mrmicky', 'shadded.kern.gui'
-    minimize();
+
+    minimize()
 }
 
 
