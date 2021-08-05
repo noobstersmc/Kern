@@ -36,7 +36,9 @@ jobs:
       shell: bash
       run: |
         mkdir -p ~/.gradle/
-        echo ${GRADLE_PROPERTIES} > ~/.gradle/gradle.properties
+        cat >> ~/.gradle/gradle.properties << EOL
+        ${GRADLE_PROPERTIES}
+        EOL
     # Build the project
     - name: Build with Gradle
       run: ./gradlew build
