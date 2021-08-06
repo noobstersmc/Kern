@@ -28,13 +28,12 @@ public class ChatListener implements Listener {
 
     public ChatListener(final Kern instance) {
         this.instance = instance;
-
     }
 
     /*
      * Chat Channels
      */
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void chatChannel(AsyncPlayerChatEvent e) {
         var player = e.getPlayer();
         var msg = e.getMessage();
@@ -55,6 +54,7 @@ public class ChatListener implements Listener {
             return;
         }
         if (player.getGameMode() == GameMode.SPECTATOR && !player.hasPermission("uhc.chat.spec")) {
+
             sendSpecMessage(player, msg);
             e.setCancelled(true);
             return;
@@ -62,7 +62,7 @@ public class ChatListener implements Listener {
 
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void checkForMute(AsyncPlayerChatEvent e) {
         if (instance.getChatManager().isGlobalmute() && !e.getPlayer().hasPermission("globalmute.talk")) {
             e.setCancelled(true);
@@ -105,7 +105,7 @@ public class ChatListener implements Listener {
     /*
      * Chat formatters.
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void coolDown(AsyncPlayerChatEvent e) {
 
         if (!chatCoolDown.containsKey(e.getPlayer().getUniqueId())
@@ -118,12 +118,12 @@ public class ChatListener implements Listener {
 
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void setFormat(AsyncPlayerChatEvent e) {
         e.setFormat(getFormatted());
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOW)
     public void onChatHigh(AsyncPlayerChatEvent e) {
         String format = e.getFormat();
         var vaultChat = instance.getChatManager().getVaultChat();
