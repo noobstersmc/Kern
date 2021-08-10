@@ -64,6 +64,10 @@ dependencies {//Paper
     //Jackson
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+    //JColor
+    implementation 'com.diogonunes:JColor:5.0.1'
+
+    implementation 'com.github.InfinityZ25:AnimationsCore:v0.0.1'
 
 
 }
