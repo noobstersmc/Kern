@@ -38,14 +38,6 @@ repositories {
     maven { url 'https://repo.md-5.net/content/groups/public/'}    
     maven { url "https://repo.dmulloy2.net/repository/public/" }
 
-    /*Noobsters/Hynix Repository */    
-    maven {
-        url 'https://dev.repo.noobsters.net/'
-        credentials {
-            username "${hynx_usr}"
-            password "${hynx_pass}"
-        }
-    }
 }
 
 dependencies {//Paper 
@@ -73,15 +65,6 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-        }
-    }
-    repositories {
-        maven {
-            url 'https://dev.repo.noobsters.net/'
-            credentials {
-                username "${hynx_usr}"
-                password "${hynx_pass}"
-            }
         }
     }
 }
